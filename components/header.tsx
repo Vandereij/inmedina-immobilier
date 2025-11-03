@@ -1,36 +1,73 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import SocialLinks from "./social-links";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import nmlogo from "../public/nmlogo.png";
+import nmlogodark from "../public/nmlogodark.png";
 
 export default function Header() {
 	const pathname = usePathname();
 	const isAuthPage = pathname?.startsWith("/auth");
+	const isHomePage = pathname === "/";
+	const headerPosition = isHomePage ? 'absolute left-0 right-0' : ''
+	const linkColor = isHomePage ? 'text-white' : ''
+	const logoImage = isHomePage ? nmlogodark : nmlogo
 
 	return (
-		<header className="p-4 border-b flex items-center justify-between">
-			<Link href="/" className="font-semibold text-lg">
-				RealEstate
-			</Link>
+		<>
+			<header className={`pt-4 pb-16 flex items-center justify-center ${headerPosition}`}>
+				<div className="w-10/12">
+					<SocialLinks />
+					<div className="flex">
+						<nav className="flex w-full items-center justify-between">
+							<Link href="/" className="font-semibold text-lg">
+								<Image alt="InMedina Logo" src={logoImage} width={90} height={90}/>
+							</Link>
 
-			<nav className="flex gap-4 text-sm items-center">
-				<Link href="/properties" className="hover:underline">
-					Properties
-				</Link>
-				<Link href="/blog" className="hover:underline">
-					Blog
-				</Link>
-				<Link href="/admin" className="hover:underline">
-					Admin
-				</Link>
-				{!isAuthPage && (
-					<Link
-						href="/auth"
-						className="border rounded-xl px-3 py-1 hover:bg-gray-100"
-					>
-						Login / Sign up
-					</Link>
-				)}
-			</nav>
-		</header>
+							<div className="flex gap-4">
+								<Button className={`${linkColor}`} size="sm" variant="link" asChild>
+									<Link
+										href="/properties"
+										className="hover:underline font-medium"
+									>
+										Properties
+									</Link>
+								</Button>
+
+								<Button className={`${linkColor}`} size="sm" variant="link" asChild>
+									<Link
+										href="/blog"
+										className="hover:underline"
+									>
+										Blog
+									</Link>
+								</Button>
+
+								<Button className={`${linkColor}`} size="sm" variant="link" asChild>
+									<Link
+										href="/admin"
+										className="hover:underline"
+									>
+										Admin
+									</Link>
+								</Button>
+							</div>
+							{!isAuthPage && (
+								<Button
+									size="lg"
+									variant="default"
+									className="rounded-full"
+									asChild
+								>
+									<Link href="/auth">Login / Sign up</Link>
+								</Button>
+							)}
+						</nav>
+					</div>
+				</div>
+			</header>
+		</>
 	);
 }

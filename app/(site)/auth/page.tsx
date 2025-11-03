@@ -85,87 +85,97 @@ export default function AuthPage() {
 
 	return (
 		<div className="mx-auto max-w-md border rounded-2xl p-6 grid gap-6">
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-semibold">
-					{mode === "login" ? "Log in" : "Create an account"}
-				</h1>
-				<button
-					className="text-sm underline"
-					onClick={() =>
-						setMode((m) => (m === "login" ? "signup" : "login"))
-					}
-					disabled={pending}
-				>
-					{mode === "login"
-						? "Need an account?"
-						: "Have an account? Log in"}
-				</button>
+			<div className="flex justify-center">
+				<div className="w-10/12">
+					<div className="flex items-center justify-between">
+						<h1 className="text-2xl font-semibold">
+							{mode === "login" ? "Log in" : "Create an account"}
+						</h1>
+						<button
+							className="text-sm underline"
+							onClick={() =>
+								setMode((m) =>
+									m === "login" ? "signup" : "login"
+								)
+							}
+							disabled={pending}
+						>
+							{mode === "login"
+								? "Need an account?"
+								: "Have an account? Log in"}
+						</button>
+					</div>
+
+					<form className="grid gap-3" onSubmit={handleEmailPassword}>
+						<label className="grid gap-1">
+							<span className="text-sm">Email</span>
+							<input
+								type="email"
+								className="border rounded-xl p-2"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								required
+								autoComplete="email"
+							/>
+						</label>
+
+						<label className="grid gap-1">
+							<span className="text-sm">Password</span>
+							<input
+								type="password"
+								className="border rounded-xl p-2"
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								required
+								autoComplete={
+									mode === "login"
+										? "current-password"
+										: "new-password"
+								}
+								minLength={6}
+							/>
+						</label>
+
+						<button
+							type="submit"
+							className="border rounded-xl p-2 disabled:opacity-60"
+							disabled={pending}
+						>
+							{pending
+								? mode === "login"
+									? "Logging in…"
+									: "Signing up…"
+								: mode === "login"
+								? "Log in"
+								: "Sign up"}
+						</button>
+					</form>
+
+					<div className="text-center text-sm text-gray-500">or</div>
+
+					<div className="grid gap-2">
+						<button
+							className="border rounded-xl p-2"
+							onClick={() => handleOAuth("google")}
+							disabled={pending}
+						>
+							Continue with Google
+						</button>
+					</div>
+
+					{message && (
+						<div className="text-green-600 text-sm">{message}</div>
+					)}
+					{error && (
+						<div className="text-red-600 text-sm">{error}</div>
+					)}
+
+					<p className="text-xs text-gray-500">
+						By continuing, you agree to our Terms and acknowledge
+						our Privacy Policy.
+					</p>
+				</div>
 			</div>
-
-			<form className="grid gap-3" onSubmit={handleEmailPassword}>
-				<label className="grid gap-1">
-					<span className="text-sm">Email</span>
-					<input
-						type="email"
-						className="border rounded-xl p-2"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						required
-						autoComplete="email"
-					/>
-				</label>
-
-				<label className="grid gap-1">
-					<span className="text-sm">Password</span>
-					<input
-						type="password"
-						className="border rounded-xl p-2"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						required
-						autoComplete={
-							mode === "login"
-								? "current-password"
-								: "new-password"
-						}
-						minLength={6}
-					/>
-				</label>
-
-				<button
-					type="submit"
-					className="border rounded-xl p-2 disabled:opacity-60"
-					disabled={pending}
-				>
-					{pending
-						? mode === "login"
-							? "Logging in…"
-							: "Signing up…"
-						: mode === "login"
-						? "Log in"
-						: "Sign up"}
-				</button>
-			</form>
-
-			<div className="text-center text-sm text-gray-500">or</div>
-
-			<div className="grid gap-2">
-				<button
-					className="border rounded-xl p-2"
-					onClick={() => handleOAuth("google")}
-					disabled={pending}
-				>
-					Continue with Google
-				</button>
-			</div>
-
-			{message && <div className="text-green-600 text-sm">{message}</div>}
-			{error && <div className="text-red-600 text-sm">{error}</div>}
-
-			<p className="text-xs text-gray-500">
-				By continuing, you agree to our Terms and acknowledge our
-				Privacy Policy.
-			</p>
 		</div>
 	);
 }

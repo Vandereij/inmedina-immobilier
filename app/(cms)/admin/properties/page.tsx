@@ -9,7 +9,7 @@ export default async function PropertiesPage({
 }: {
 	searchParams: Promise<Record<string, string | string[]>>;
 }) {
-	const params = await searchParams; 
+	const params = await searchParams;
 	const pageParam = Array.isArray(params.page) ? params.page[0] : params.page;
 	const page = Number(pageParam || 1);
 
@@ -45,43 +45,48 @@ export default async function PropertiesPage({
 
 	return (
 		<section className="grid gap-6">
-			<h1 className="text-2xl font-semibold">Properties</h1>
-			<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-				{data?.map((p: any) => (
-					<Link
-						key={p.id}
-						href={`/properties/${p.slug}`}
-						className="border rounded-2xl overflow-hidden"
-					>
-						<img
-							src={
-								p.cover_image_url ||
-								"https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
-							}
-							alt=""
-							className="w-full h-48 object-cover"
-						/>
-						<div className="p-3">
-							<div className="font-medium">{p.title}</div>
-							<div className="text-sm">
-								{p.currency} {Number(p.price).toLocaleString()}
-							</div>
-						</div>
-					</Link>
-				))}
-			</div>
-			<div className="flex gap-2">
-				{Array.from({ length: totalPages }).map((_, i) => (
-					<Link
-						key={i}
-						href={`/properties?page=${i + 1}`}
-						className={`px-3 py-1 border rounded-xl ${
-							page === i + 1 ? "bg-gray-100" : ""
-						}`}
-					>
-						{i + 1}
-					</Link>
-				))}
+			<div className="flex justify-center">
+				<div className="w-10/12">
+					<h1 className="text-2xl font-semibold">Properties</h1>
+					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+						{data?.map((p: any) => (
+							<Link
+								key={p.id}
+								href={`/properties/${p.slug}`}
+								className="border rounded-2xl overflow-hidden"
+							>
+								<img
+									src={
+										p.cover_image_url ||
+										"https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
+									}
+									alt=""
+									className="w-full h-48 object-cover"
+								/>
+								<div className="p-3">
+									<div className="font-medium">{p.title}</div>
+									<div className="text-sm">
+										{p.currency}{" "}
+										{Number(p.price).toLocaleString()}
+									</div>
+								</div>
+							</Link>
+						))}
+					</div>
+					<div className="flex gap-2">
+						{Array.from({ length: totalPages }).map((_, i) => (
+							<Link
+								key={i}
+								href={`/properties?page=${i + 1}`}
+								className={`px-3 py-1 border rounded-xl ${
+									page === i + 1 ? "bg-gray-100" : ""
+								}`}
+							>
+								{i + 1}
+							</Link>
+						))}
+					</div>
+				</div>
 			</div>
 		</section>
 	);
