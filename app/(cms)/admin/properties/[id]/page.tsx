@@ -71,16 +71,16 @@ export default function EditProperty() {
 							/>
 							<select
 								className="border rounded-xl p-2"
-								value={model.availability || "for_sale"}
+								value={model.property_type || "sale"}
 								onChange={(e) =>
 									setModel({
 										...model,
-										availability: e.target.value,
+										property_type: e.target.value,
 									})
 								}
 							>
-								<option value="for_sale">For sale</option>
-								<option value="for_rent">For rent</option>
+								<option value="sale">For sale</option>
+								<option value="rent">For rent</option>
 							</select>
 							<input
 								type="number"

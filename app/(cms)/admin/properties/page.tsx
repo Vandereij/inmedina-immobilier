@@ -28,15 +28,15 @@ export default async function PropertiesPage({
 		.order("created_at", { ascending: false })
 		.range(from, to);
 
-	const availability = Array.isArray(params.availability)
-		? params.availability[0]
-		: params.availability;
+	const property_type = Array.isArray(params.property_type)
+		? params.property_type[0]
+		: params.property_type;
 	const location = Array.isArray(params.location)
 		? params.location[0]
 		: params.location;
 	const q = Array.isArray(params.q) ? params.q[0] : params.q;
 
-	if (availability) query = query.eq("availability", availability);
+	if (property_type) query = query.eq("property_type", property_type);
 	if (location) query = query.eq("location_id", location);
 	if (q) query = query.contains("amenities", [q]);
 

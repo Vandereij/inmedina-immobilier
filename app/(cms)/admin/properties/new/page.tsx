@@ -1,128 +1,650 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import TextAlign from "@tiptap/extension-text-align";
+import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
+import { createBrowserClient } from "@supabase/ssr";
 import { slugify } from "@/lib/slugify";
-import RichEditor from "@/components/editor";
 import { ImageUploader } from "@/components/image-uploader";
 import { SeoFields } from "@/components/seo-fields";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+	AlertCircle,
+	Loader2,
+	X,
+	Bold,
+	Italic,
+	Underline as UnderlineIcon,
+	List,
+	ListOrdered,
+	AlignLeft,
+	AlignCenter,
+	AlignRight,
+	Link2,
+	Image as ImageIcon,
+	Undo,
+	Redo,
+} from "lucide-react";
+
+// Tiptap Toolbar Component
+function TiptapToolbar({ editor }: { editor: any }) {
+	if (!editor) return null;
+
+	const addLink = () => {
+		const url = window.prompt("Enter URL:");
+		if (url) {
+			editor.chain().focus().setLink({ href: url }).run();
+		}
+	};
+
+	const addImage = () => {
+		const url = window.prompt("Enter image URL:");
+		if (url) {
+			editor.chain().focus().setImage({ src: url }).run();
+		}
+	};
+
+	return (
+		<div className="border border-b-0 rounded-t-lg p-2 flex flex-wrap gap-1 bg-gray-50">
+			<Button
+				type="button"
+				variant={editor.isActive("bold") ? "secondary" : "ghost"}
+				size="sm"
+				onClick={() => editor.chain().focus().toggleBold().run()}
+			>
+				<Bold className="h-4 w-4" />
+			</Button>
+			<Button
+				type="button"
+				variant={editor.isActive("italic") ? "secondary" : "ghost"}
+				size="sm"
+				onClick={() => editor.chain().focus().toggleItalic().run()}
+			>
+				<Italic className="h-4 w-4" />
+			</Button>
+			<Button
+				type="button"
+				variant={editor.isActive("underline") ? "secondary" : "ghost"}
+				size="sm"
+				onClick={() => editor.chain().focus().toggleUnderline().run()}
+			>
+				<UnderlineIcon className="h-4 w-4" />
+			</Button>
+
+			<div className="w-px h-8 bg-gray-300 mx-1" />
+
+			<Button
+				type="button"
+				variant={editor.isActive("bulletList") ? "secondary" : "ghost"}
+				size="sm"
+				onClick={() => editor.chain().focus().toggleBulletList().run()}
+			>
+				<List className="h-4 w-4" />
+			</Button>
+			<Button
+				type="button"
+				variant={editor.isActive("orderedList") ? "secondary" : "ghost"}
+				size="sm"
+				onClick={() => editor.chain().focus().toggleOrderedList().run()}
+			>
+				<ListOrdered className="h-4 w-4" />
+			</Button>
+
+			<div className="w-px h-8 bg-gray-300 mx-1" />
+
+			<Button
+				type="button"
+				variant={
+					editor.isActive({ textAlign: "left" })
+						? "secondary"
+						: "ghost"
+				}
+				size="sm"
+				onClick={() =>
+					editor.chain().focus().setTextAlign("left").run()
+				}
+			>
+				<AlignLeft className="h-4 w-4" />
+			</Button>
+			<Button
+				type="button"
+				variant={
+					editor.isActive({ textAlign: "center" })
+						? "secondary"
+						: "ghost"
+				}
+				size="sm"
+				onClick={() =>
+					editor.chain().focus().setTextAlign("center").run()
+				}
+			>
+				<AlignCenter className="h-4 w-4" />
+			</Button>
+			<Button
+				type="button"
+				variant={
+					editor.isActive({ textAlign: "right" })
+						? "secondary"
+						: "ghost"
+				}
+				size="sm"
+				onClick={() =>
+					editor.chain().focus().setTextAlign("right").run()
+				}
+			>
+				<AlignRight className="h-4 w-4" />
+			</Button>
+
+			<div className="w-px h-8 bg-gray-300 mx-1" />
+
+			<Button type="button" variant="ghost" size="sm" onClick={addLink}>
+				<Link2 className="h-4 w-4" />
+			</Button>
+			<Button type="button" variant="ghost" size="sm" onClick={addImage}>
+				<ImageIcon className="h-4 w-4" />
+			</Button>
+
+			<div className="w-px h-8 bg-gray-300 mx-1" />
+
+			<Button
+				type="button"
+				variant="ghost"
+				size="sm"
+				onClick={() => editor.chain().focus().undo().run()}
+				disabled={!editor.can().undo()}
+			>
+				<Undo className="h-4 w-4" />
+			</Button>
+			<Button
+				type="button"
+				variant="ghost"
+				size="sm"
+				onClick={() => editor.chain().focus().redo().run()}
+				disabled={!editor.can().redo()}
+			>
+				<Redo className="h-4 w-4" />
+			</Button>
+		</div>
+	);
+}
 
 export default function NewProperty() {
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [availability, setAvailability] = useState<"for_sale" | "for_rent">("for_sale");
-  const [price, setPrice] = useState<number>(0);
-  const [cover, setCover] = useState("");
-  const [gallery, setGallery] = useState<string[]>([]);
-  const [desc, setDesc] = useState<any>("");
-  const [seo, setSeo] = useState<any>({});
-  const [saving, setSaving] = useState(false);
+	// Create client-side Supabase client with auth
+	const supabase = useMemo(
+		() =>
+			createBrowserClient(
+				process.env.NEXT_PUBLIC_SUPABASE_URL!,
+				process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+			),
+		[]
+	);
 
-  async function save() {
-    setSaving(true);
-    try {
-      const finalSlug = slug || slugify(title);
+	// Debug: Check session on mount
+	useEffect(() => {
+		async function checkSession() {
+			const {
+				data: { session },
+				error,
+			} = await supabase.auth.getSession();
+			console.log("Current session:", session);
+			console.log("Session error:", error);
+			if (!session) {
+				console.warn("No active session found!");
+			}
+		}
+		checkSession();
+	}, [supabase]);
 
-      const res = await fetch("/api/properties", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          slug: finalSlug,
-          availability,
-          price,
-          cover_image_url: cover,
-          gallery: gallery.map((u) => ({ url: u })),
-          description: desc,
-          status: "draft",
-          ...seo, // only the API’s allowlist is inserted
-        }),
-      });
+	const [title, setTitle] = useState("");
+	const [slug, setSlug] = useState("");
+	const [propertyType, setPropertyType] = useState<"sale" | "rent">(
+		"sale"
+	);
+	const [price, setPrice] = useState<string>("");
+	const [cover, setCover] = useState("");
+	const [gallery, setGallery] = useState<string[]>([]);
+	const [seo, setSeo] = useState<any>({});
+	const [saving, setSaving] = useState(false);
+	const [errors, setErrors] = useState<Record<string, string>>({});
 
-const json = await res.json().catch(() => ({}));
-if (!res.ok) {
-  console.error(json);
-  alert(json.error || "Insert failed");
-  return;
-}
-      if (!res.ok) {
-        const { error } = await res.json().catch(() => ({ error: "Failed to create" }));
-        alert(error || "Failed to create");
-        return;
-      }
+	// Initialize Tiptap editor
+	const editor = useEditor({
+		extensions: [
+			StarterKit,
+			Underline,
+			TextAlign.configure({
+				types: ["heading", "paragraph"],
+			}),
+			Link.configure({
+				openOnClick: false,
+			}),
+			Image,
+		],
+		content: "",
+		immediatelyRender: false,
+		editorProps: {
+			attributes: {
+				class: "prose prose-sm max-w-none focus:outline-none min-h-[300px] p-4",
+			},
+		},
+		onUpdate: ({ editor }) => {
+			if (errors.description) {
+				setErrors((prev) => ({ ...prev, description: "" }));
+			}
+		},
+	});
 
-      window.location.href = "/admin/properties";
-    } finally {
-      setSaving(false);
-    }
-  }
+	function validateForm() {
+		const newErrors: Record<string, string> = {};
 
-  return (
-    <div className="grid gap-4">
-      <h1 className="text-xl font-semibold">New Property</h1>
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="grid gap-3">
-          <input
-            className="border rounded-xl p-2"
-            placeholder="Title"
-            value={title}
-            onChange={(e) => {
-              const v = e.target.value;
-              setTitle(v);
-              setSlug(slugify(v));
-            }}
-          />
-          <input
-            className="border rounded-xl p-2"
-            placeholder="Slug"
-            value={slug}
-            onChange={(e) => setSlug(slugify(e.target.value))}
-          />
-          <select
-            className="border rounded-xl p-2"
-            value={availability}
-            onChange={(e) => setAvailability(e.target.value as "for_sale" | "for_rent")}
-          >
-            <option value="for_sale">For sale</option>
-            <option value="for_rent">For rent</option>
-          </select>
-          <input
-            type="number"
-            className="border rounded-xl p-2"
-            placeholder="Price"
-            value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
-          />
-          <label className="grid gap-2">
-            <span className="text-sm">Cover image</span>
-            {cover ? (
-              <img src={cover} alt="cover" className="w-full h-40 object-cover rounded-xl" />
-            ) : null}
-            <ImageUploader onUploaded={(u) => setCover(u)} />
-          </label>
-          <label className="grid gap-2">
-            <span className="text-sm">Gallery</span>
-            <div className="grid grid-cols-3 gap-2">
-              {gallery.map((u, i) => (
-                <img key={i} src={u} className="w-full h-24 object-cover rounded" />
-              ))}
-            </div>
-            <ImageUploader onUploaded={(u) => setGallery((g) => [...g, u])} />
-          </label>
-        </div>
-        <div className="grid gap-3">
-          <span className="text-sm">Description</span>
-          <RichEditor value={desc} onChange={setDesc} />
-          <span className="text-sm">SEO</span>
-          <SeoFields value={seo} onChange={setSeo} />
-          <button
-            onClick={save}
-            disabled={saving}
-            className="border rounded-xl p-2 disabled:opacity-50"
-          >
-            {saving ? "Saving..." : "Save"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+		if (!title.trim()) {
+			newErrors.title = "Title is required";
+		} else if (title.length < 3) {
+			newErrors.title = "Title must be at least 3 characters";
+		} else if (title.length > 200) {
+			newErrors.title = "Title must not exceed 200 characters";
+		}
+
+		if (!slug.trim()) {
+			newErrors.slug = "Slug is required";
+		} else if (!/^[a-z0-9-]+$/.test(slug)) {
+			newErrors.slug =
+				"Slug can only contain lowercase letters, numbers, and hyphens";
+		}
+
+		if (!price || parseFloat(price) <= 0) {
+			newErrors.price = "Price must be greater than 0";
+		} else if (parseFloat(price) > 1000000000) {
+			newErrors.price = "Price seems unreasonably high";
+		}
+
+		if (!cover) {
+			newErrors.cover = "Cover image is required";
+		}
+
+		if (!editor || !editor.getText().trim()) {
+			newErrors.description = "Description is required";
+		}
+
+		setErrors(newErrors);
+		return Object.keys(newErrors).length === 0;
+	}
+
+	async function save() {
+		if (!validateForm()) {
+			return;
+		}
+
+		setSaving(true);
+		try {
+			const finalSlug = slug || slugify(title);
+
+			const res = await fetch("/api/properties", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					title,
+					slug: finalSlug,
+					property_type: propertyType,
+					price: parseFloat(price),
+					cover_image_url: cover,
+					gallery: gallery.map((u) => ({ url: u })),
+					description: editor?.getHTML() || "",
+					status: "draft",
+					...seo,
+				}),
+			});
+
+			const json = await res.json().catch(() => ({}));
+			if (!res.ok) {
+				console.error(json);
+				alert(json.error || "Insert failed");
+				return;
+			}
+
+			window.location.href = "/admin/properties";
+		} finally {
+			setSaving(false);
+		}
+	}
+
+	function removeGalleryImage(index: number) {
+		setGallery((g) => g.filter((_, i) => i !== index));
+	}
+
+	return (
+		<section className="min-h-screen bg-gray-50 py-8">
+			<div className="container mx-auto max-w-6xl px-4">
+				<div className="mb-6">
+					<h1 className="text-3xl font-bold tracking-tight">
+						New Property
+					</h1>
+					<p className="text-muted-foreground mt-1">
+						Create a new property listing for your portfolio
+					</p>
+				</div>
+
+				<div className="grid gap-6 lg:grid-cols-2">
+					{/* Left Column */}
+					<div className="space-y-6">
+						<Card>
+							<CardHeader>
+								<CardTitle>Basic Information</CardTitle>
+								<CardDescription>
+									Enter the core details about the property
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<div className="space-y-2">
+									<Label htmlFor="title">
+										Title{" "}
+										<span className="text-red-500">*</span>
+									</Label>
+									<Input
+										id="title"
+										placeholder="Enter property title"
+										value={title}
+										onChange={(e) => {
+											const v = e.target.value;
+											setTitle(v);
+											setSlug(slugify(v));
+											if (errors.title) {
+												setErrors((prev) => ({
+													...prev,
+													title: "",
+												}));
+											}
+										}}
+										className={
+											errors.title ? "border-red-500" : ""
+										}
+									/>
+									{errors.title && (
+										<p className="text-sm text-red-500 flex items-center gap-1">
+											<AlertCircle className="h-3 w-3" />
+											{errors.title}
+										</p>
+									)}
+								</div>
+
+								<div className="space-y-2">
+									<Label htmlFor="slug">
+										Slug{" "}
+										<span className="text-red-500">*</span>
+									</Label>
+									<Input
+										id="slug"
+										placeholder="auto-generated-from-title"
+										value={slug}
+										onChange={(e) => {
+											setSlug(slugify(e.target.value));
+											if (errors.slug) {
+												setErrors((prev) => ({
+													...prev,
+													slug: "",
+												}));
+											}
+										}}
+										className={
+											errors.slug ? "border-red-500" : ""
+										}
+									/>
+									{errors.slug && (
+										<p className="text-sm text-red-500 flex items-center gap-1">
+											<AlertCircle className="h-3 w-3" />
+											{errors.slug}
+										</p>
+									)}
+								</div>
+
+								<div className="space-y-2">
+									<Label htmlFor="property-type">
+										Property Type{" "}
+										<span className="text-red-500">*</span>
+									</Label>
+									<Select
+										value={propertyType}
+										onValueChange={(
+											value: "sale" | "rent"
+										) => setPropertyType(value)}
+									>
+										<SelectTrigger id="property-type">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="sale">
+												For Sale
+											</SelectItem>
+											<SelectItem value="rent">
+												For Rent
+											</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+
+								<div className="space-y-2">
+									<Label htmlFor="price">
+										Price{" "}
+										<span className="text-red-500">*</span>
+									</Label>
+									<Input
+										id="price"
+										type="number"
+										placeholder="0"
+										value={price}
+										onChange={(e) => {
+											setPrice(e.target.value);
+											if (errors.price) {
+												setErrors((prev) => ({
+													...prev,
+													price: "",
+												}));
+											}
+										}}
+										className={
+											errors.price ? "border-red-500" : ""
+										}
+										min="0"
+										step="0.01"
+									/>
+									{errors.price && (
+										<p className="text-sm text-red-500 flex items-center gap-1">
+											<AlertCircle className="h-3 w-3" />
+											{errors.price}
+										</p>
+									)}
+								</div>
+							</CardContent>
+						</Card>
+
+						<Card>
+							<CardHeader>
+								<CardTitle>Images</CardTitle>
+								<CardDescription>
+									Upload property images to showcase the
+									listing
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<div className="space-y-2">
+									<Label>
+										Cover Image{" "}
+										<span className="text-red-500">*</span>
+									</Label>
+									{cover && (
+										<div className="relative">
+											<img
+												src={cover}
+												alt="cover"
+												className="w-full h-48 object-cover rounded-lg border"
+											/>
+											<Button
+												type="button"
+												variant="destructive"
+												size="icon"
+												className="absolute top-2 right-2 h-8 w-8"
+												onClick={() => {
+													setCover("");
+													if (errors.cover) {
+														setErrors((prev) => ({
+															...prev,
+															cover: "",
+														}));
+													}
+												}}
+											>
+												<X className="h-4 w-4" />
+											</Button>
+										</div>
+									)}
+									
+									<ImageUploader
+										prefix="properties/"
+										onUploaded={(url) => setCover(url)}
+									/>
+									{errors.cover && (
+										<p className="text-sm text-red-500 flex items-center gap-1">
+											<AlertCircle className="h-3 w-3" />
+											{errors.cover}
+										</p>
+									)}
+								</div>
+
+								<div className="space-y-2">
+									<Label>Gallery Images</Label>
+									{gallery.length > 0 && (
+										<div className="grid grid-cols-3 gap-2">
+											{gallery.map((u, i) => (
+												<div
+													key={i}
+													className="relative group"
+												>
+													<img
+														src={u}
+														alt={`gallery-${i}`}
+														className="w-full h-24 object-cover rounded-lg border"
+													/>
+													<Button
+														type="button"
+														variant="destructive"
+														size="icon"
+														className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+														onClick={() =>
+															removeGalleryImage(
+																i
+															)
+														}
+													>
+														<X className="h-3 w-3" />
+													</Button>
+												</div>
+											))}
+										</div>
+									)}
+									<ImageUploader
+										prefix="properties/"
+										onUploaded={(url) => setCover(url)}
+									/>
+								</div>
+							</CardContent>
+						</Card>
+					</div>
+
+					{/* Right Column */}
+					<div className="space-y-6">
+						<Card>
+							<CardHeader>
+								<CardTitle>Description</CardTitle>
+								<CardDescription>
+									Provide detailed information about the
+									property
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-2">
+								<Label>
+									Content{" "}
+									<span className="text-red-500">*</span>
+								</Label>
+								<div
+									className={`border rounded-lg ${
+										errors.description
+											? "border-red-500"
+											: ""
+									}`}
+								>
+									<TiptapToolbar editor={editor} />
+									<EditorContent editor={editor} />
+								</div>
+								{errors.description && (
+									<p className="text-sm text-red-500 flex items-center gap-1">
+										<AlertCircle className="h-3 w-3" />
+										{errors.description}
+									</p>
+								)}
+							</CardContent>
+						</Card>
+
+						<Card>
+							<CardHeader>
+								<CardTitle>SEO Settings</CardTitle>
+								<CardDescription>
+									Optimize your property for search engines
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<SeoFields value={seo} onChange={setSeo} />
+							</CardContent>
+						</Card>
+
+						{Object.keys(errors).length > 0 && (
+							<Alert variant="destructive">
+								<AlertCircle className="h-4 w-4" />
+								<AlertDescription>
+									Please fix the validation errors before
+									saving.
+								</AlertDescription>
+							</Alert>
+						)}
+
+						<Button
+							onClick={save}
+							disabled={saving}
+							className="w-full"
+							size="lg"
+						>
+							{saving ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									Saving...
+								</>
+							) : (
+								"Save Property"
+							)}
+						</Button>
+					</div>
+				</div>
+			</div>
+		</section>
+	);
 }

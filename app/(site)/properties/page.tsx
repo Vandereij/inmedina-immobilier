@@ -25,8 +25,8 @@ export default async function PropertiesPage({
 		.order("created_at", { ascending: false })
 		.range(from, to);
 
-	if (params.availability)
-		query = query.eq("availability", params.availability);
+	if (params.property_type)
+		query = query.eq("property_type", params.property_type);
 	if (params.location) query = query.eq("location_id", params.location);
 	if (params.q) query = query.contains("amenities", [params.q]);
 

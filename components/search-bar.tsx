@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider"; // Assuming you'd use a Shadcn 
 
 export default function SearchBar() {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mt-20">
+    <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mt-20 mb-25">
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-center">
         {/* Rent Dropdown */}
         <DropdownMenu>
