@@ -1,5 +1,13 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
+import {
+	Card,
+	CardHeader,
+	CardContent,
+	CardFooter,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export const revalidate = 60;
 
@@ -34,45 +42,89 @@ export default async function PropertiesPage({
 	const totalPages = Math.max(1, Math.ceil((count || 0) / pageSize));
 
 	return (
-		<section className="grid gap-6">
+		<section className="flex flex-col gap-12">
+			{/* 🏡 Hero Banner */}
+			<div className="relative h-[400px] w-full overflow-hidden shadow-lg">
+				<img
+					src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1920&auto=format&fit=crop"
+					alt="Luxury homes hero banner"
+					className="absolute inset-0 w-full h-full object-cover"
+				/>
+				<div className="absolute inset-0 bg-linear-to-b from-black/50 to-black/70 flex items-center justify-center text-center px-6">
+					<div className="max-w-2xl text-white space-y-4">
+						<h1 className="text-4xl md:text-5xl font-semibold">
+							Find Your Dream Property
+						</h1>
+						<p className="text-lg text-gray-200">
+							Explore our curated listings of luxury homes, apartments, and
+							villas for every lifestyle.
+						</p>
+						<div className="flex justify-center gap-4">
+							<Button asChild size="lg" variant="secondary">
+								<Link href="/properties">Browse Properties</Link>
+							</Button>
+							<Button asChild size="lg" variant="secondary">
+								<Link href="/contact">Contact Agent</Link>
+							</Button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* 🏠 Properties Grid */}
 			<div className="flex justify-center">
-				<div className="w-10/12">
-					<h1 className="text-2xl font-semibold">Properties</h1>
-					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div className="w-10/12 pb-16">
+					<h2 className="text-2xl font-semibold mb-4">Available Properties</h2>
+					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 						{data?.map((p: any) => (
-							<Link
-								key={p.id}
-								href={`/properties/${p.slug}`}
-								className="border rounded-2xl overflow-hidden"
-							>
-								<img
-									src={
-										p.cover_image_url ||
-										"https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
-									}
-									alt=""
-									className="w-full h-48 object-cover"
-								/>
-								<div className="p-3">
-									<div className="font-medium">{p.title}</div>
-									<div className="text-sm">
-										{p.currency}{" "}
-										{Number(p.price).toLocaleString()}
+							<Link key={p.id} href={`/properties/${p.slug}`}>
+								<Card className="hover:shadow-md transition-shadow overflow-hidden rounded-2xl">
+									<div className="relative">
+										<img
+											src={
+												p.cover_image_url ||
+												"https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
+											}
+											alt={p.title}
+											className="w-full h-48 object-cover"
+										/>
+										<div className="absolute top-2 right-2">
+											<Badge variant="secondary">
+												{p.locations?.name || "Unknown"}
+											</Badge>
+										</div>
 									</div>
-								</div>
+									<CardHeader className="pb-2">
+										<h3 className="font-semibold text-lg">{p.title}</h3>
+									</CardHeader>
+									<CardContent>
+										<div className="text-sm text-muted-foreground">
+											{p.bedrooms} bd • {p.bathrooms} ba
+										</div>
+										<div className="text-base font-medium mt-1">
+											{p.currency} {Number(p.price).toLocaleString()}
+										</div>
+									</CardContent>
+									<CardFooter>
+										<Button variant="outline" className="w-full">
+											View Details
+										</Button>
+									</CardFooter>
+								</Card>
 							</Link>
 						))}
 					</div>
-					<div className="flex gap-2">
+
+					{/* Pagination */}
+					<div className="flex gap-2 mt-6 justify-center">
 						{Array.from({ length: totalPages }).map((_, i) => (
-							<Link
-								key={i}
-								href={`/properties?page=${i + 1}`}
-								className={`px-3 py-1 border rounded-xl ${
-									page === i + 1 ? "bg-gray-100" : ""
-								}`}
-							>
-								{i + 1}
+							<Link key={i} href={`/properties?page=${i + 1}`}>
+								<Button
+									variant={page === i + 1 ? "secondary" : "outline"}
+									className="rounded-xl"
+								>
+									{i + 1}
+								</Button>
 							</Link>
 						))}
 					</div>
