@@ -40,10 +40,28 @@ export async function getSession() {
 
 // ✅ requireAdmin now trusts the httpOnly cookie created by /api/auth/sync-admin
 export async function requireAdmin() {
-  const store = await getCookieStore();
-  const isAdmin = store.get('is-admin')?.value === '1';
-  if (!isAdmin) {
-    redirect('/auth?next=/admin');
+  // 1. Create a server-side Supabase client
+  const supabase = await createSupabaseServerClient();
+
+  // 2. Get the current user from the real session
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // 3. If there's no user, they are not logged in. Redirect.
+  if (!user) {
+    redirect('/auth?next=/admin'); // Or your actual login page
   }
-  return true;
+
+  // 4. Check if the user's metadata contains the 'admin' role.
+  //    This MUST match the check in your RLS policy.
+  const isAdmin = user.app_metadata?.roles?.includes('admin');
+
+  // 5. If the user is logged in but is NOT an admin, redirect them.
+  //    Redirecting to a 404 is often better than an "unauthorized" page
+  //    as it doesn't reveal that the protected page exists.
+  if (!isAdmin) {
+    redirect('/not-found');
+  }
+
+  // If all checks pass, you can optionally return the user object
+  return user;
 }

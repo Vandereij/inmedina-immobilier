@@ -8,7 +8,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: property, error } = await supabase
     .from("properties")
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PropertyDetail({ params }: Props) {
 	const { slug } = await params; // 👈 unwrap the Promise
-	const supabase = createClient();
+	const supabase = await createClient();
 	
 	const { data: property } = await supabase
 		.from("properties")

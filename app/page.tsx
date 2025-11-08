@@ -2,10 +2,9 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
 import { useMemo } from "react";
 import SearchBar from "@/components/search-bar";
-import Header from "@/components/header";
 
 export default async function HomePage() {
-	const supabase = useMemo(() => createClient(), []);
+	const supabase = await useMemo(() => createClient(), []);
 	const { data: locations } = await supabase
 		.from("locations")
 		.select("*")
@@ -26,13 +25,6 @@ export default async function HomePage() {
 							</h2>
 						</div>
 						<SearchBar />
-						{/* <div className="align-middle text-sm text-gray-600 py-6">
-						Or browse all{" "}
-						<Link className="underline" href="/properties">
-							properties
-						</Link>
-						.
-					</div> */}
 					</div>
 				</div>
 			</section>

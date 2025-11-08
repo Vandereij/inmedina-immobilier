@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
 
 export default async function BlogList() {
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { data: posts } = await supabase
 		.from("posts")
 		.select("id,title,slug,excerpt,cover_image_url,created_at")

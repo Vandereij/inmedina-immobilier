@@ -22,7 +22,7 @@ export default async function PropertiesPage({
 	const from = (page - 1) * pageSize;
 	const to = from + pageSize - 1;
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	let query = supabase
 		.from("properties")
 		.select(
@@ -33,8 +33,8 @@ export default async function PropertiesPage({
 		.order("created_at", { ascending: false })
 		.range(from, to);
 
-	if (params.property_type)
-		query = query.eq("property_type", params.property_type);
+	if (params.availability_type)
+		query = query.eq("availability_type", params.availability_type);
 	if (params.location) query = query.eq("location_id", params.location);
 	if (params.q) query = query.contains("amenities", [params.q]);
 
@@ -52,7 +52,7 @@ export default async function PropertiesPage({
 				/>
 				<div className="absolute inset-0 bg-linear-to-b from-black/50 to-black/70 flex items-center justify-center text-center px-6">
 					<div className="max-w-2xl text-white space-y-4">
-						<h1 className="text-4xl md:text-5xl font-semibold">
+						<h1 className="text-4xl md:text-5xl font-medium">
 							Find Your Dream Property
 						</h1>
 						<p className="text-lg text-gray-200">

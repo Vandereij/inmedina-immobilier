@@ -6,7 +6,7 @@ export default async function PostPage({
 }: {
 	params: { slug: string };
 }) {
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { data: post } = await supabase
 		.from("posts")
 		.select("*")

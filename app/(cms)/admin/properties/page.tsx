@@ -1,88 +1,174 @@
-// app/(site)/properties/page.tsx
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
+import {
+	Card,
+	CardHeader,
+	CardContent,
+	CardFooter,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+type SearchParams = { [key: string]: string | string[] | undefined };
 
 export default async function PropertiesPage({
 	searchParams,
 }: {
-	searchParams: Promise<Record<string, string | string[]>>;
+	searchParams: SearchParams;
 }) {
 	const params = await searchParams;
-	const pageParam = Array.isArray(params.page) ? params.page[0] : params.page;
-	const page = Number(pageParam || 1);
-
+	const page = Number(params.page || 1);
 	const pageSize = 12;
 	const from = (page - 1) * pageSize;
 	const to = from + pageSize - 1;
 
-	const supabase = createClient();
+	const supabase = await createClient();
+	
+  const [{ data: userRes }, { data: isAdmin }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.rpc("is_admin"),
+  ]);
+
+  const user = userRes?.user ?? null;
+  if (!user) redirect("/sign-in");
+  if (!isAdmin) redirect("/"); 
+
+	// Base query — now selecting status and explicitly including both statuses
 	let query = supabase
 		.from("properties")
 		.select(
-			"id,title,slug,price,currency,bedrooms,bathrooms,cover_image_url,locations(name)",
+			"id,title,slug,price,currency,bedrooms,bathrooms,cover_image_url,status,locations(name)",
 			{ count: "exact" }
 		)
-		.eq("status", "published")
 		.order("created_at", { ascending: false })
+		.in("status", ['draft','published'])
 		.range(from, to);
 
-	const property_type = Array.isArray(params.property_type)
-		? params.property_type[0]
-		: params.property_type;
-	const location = Array.isArray(params.location)
-		? params.location[0]
-		: params.location;
-	const q = Array.isArray(params.q) ? params.q[0] : params.q;
+	if (params.availability_type)
+		query = query.eq("availability_type", params.availability_type);
+	if (params.location) query = query.eq("location_id", params.location);
+	if (params.q) query = query.contains("amenities", [params.q]);
 
-	if (property_type) query = query.eq("property_type", property_type);
-	if (location) query = query.eq("location_id", location);
-	if (q) query = query.contains("amenities", [q]);
-
-	const { data, count } = await query;
+	const { data, count, error } = await query;
+	if (error) {
+		// Fail soft with empty list if needed
+		console.error("Properties query error:", error);
+	}
 	const totalPages = Math.max(1, Math.ceil((count || 0) / pageSize));
 
 	return (
-		<section className="grid gap-6">
+		<section className="flex flex-col gap-12">
+			{/* 🏡 Hero Banner */}
+			<div className="relative h-[400px] w-full overflow-hidden shadow-lg">
+				<img
+					src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1920&auto=format&fit=crop"
+					alt="Luxury homes hero banner"
+					className="absolute inset-0 w-full h-full object-cover"
+				/>
+				<div className="absolute inset-0 bg-linear-to-b from-black/50 to-black/70 flex items-center justify-center text-center px-6">
+					<div className="max-w-2xl text-white space-y-4">
+						<h1 className="text-4xl md:text-5xl font-medium">
+							Find Your Dream Property
+						</h1>
+						<p className="text-lg text-gray-200">
+							Explore our curated listings of luxury homes,
+							apartments, and villas for every lifestyle.
+						</p>
+						<div className="flex justify-center gap-4">
+							<Button asChild size="lg" variant="secondary">
+								<Link href="/properties">
+									Browse Properties
+								</Link>
+							</Button>
+							<Button asChild size="lg" variant="secondary">
+								<Link href="/contact">Contact Agent</Link>
+							</Button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* 🏠 Properties Grid */}
 			<div className="flex justify-center">
-				<div className="w-10/12">
-					<h1 className="text-2xl font-semibold">Properties</h1>
-					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div className="w-10/12 pb-16">
+					<h2 className="text-2xl font-semibold mb-4">
+						All Properties
+					</h2>
+
+					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 						{data?.map((p: any) => (
-							<Link
-								key={p.id}
-								href={`/properties/${p.slug}`}
-								className="border rounded-2xl overflow-hidden"
-							>
-								<img
-									src={
-										p.cover_image_url ||
-										"https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
-									}
-									alt=""
-									className="w-full h-48 object-cover"
-								/>
-								<div className="p-3">
-									<div className="font-medium">{p.title}</div>
-									<div className="text-sm">
-										{p.currency}{" "}
-										{Number(p.price).toLocaleString()}
+							<Link key={p.id} href={`/admin/properties/${p.id}`}>
+								<Card className="hover:shadow-md transition-shadow overflow-hidden rounded-2xl">
+									<div className="relative">
+										<img
+											src={
+												p.cover_image_url ||
+												"https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
+											}
+											alt={p.title}
+											className="w-full h-48 object-cover"
+										/>
+										<div className="absolute top-2 left-2 flex gap-2">
+											{/* Status badge (draft/published) */}
+											<Badge
+												variant={
+													p.status === "published"
+														? "default"
+														: "secondary"
+												}
+											>
+												{p.status}
+											</Badge>
+											{/* Location badge */}
+											<Badge variant="secondary">
+												{p.locations?.name || "Unknown"}
+											</Badge>
+										</div>
 									</div>
-								</div>
+
+									<CardHeader className="pb-2">
+										<h3 className="font-semibold text-lg">
+											{p.title}
+										</h3>
+									</CardHeader>
+
+									<CardContent>
+										<div className="text-sm text-muted-foreground">
+											{p.bedrooms} bd • {p.bathrooms} ba
+										</div>
+										<div className="text-base font-medium mt-1">
+											{p.currency}{" "}
+											{Number(p.price).toLocaleString()}
+										</div>
+									</CardContent>
+
+									<CardFooter>
+										<Button
+											variant="outline"
+											className="w-full"
+										>
+											View Details
+										</Button>
+									</CardFooter>
+								</Card>
 							</Link>
 						))}
 					</div>
-					<div className="flex gap-2">
+
+					{/* Pagination */}
+					<div className="flex gap-2 mt-6 justify-center">
 						{Array.from({ length: totalPages }).map((_, i) => (
-							<Link
-								key={i}
-								href={`/properties?page=${i + 1}`}
-								className={`px-3 py-1 border rounded-xl ${
-									page === i + 1 ? "bg-gray-100" : ""
-								}`}
-							>
-								{i + 1}
+							<Link key={i} href={`/properties?page=${i + 1}`}>
+								<Button
+									variant={
+										page === i + 1 ? "secondary" : "outline"
+									}
+									className="rounded-xl"
+								>
+									{i + 1}
+								</Button>
 							</Link>
 						))}
 					</div>

@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 
     // allowlist the fields you expect
     const allowed = [
-      "title","slug","property_type","price","cover_image_url",
+      "title","slug","property_type","availability_type","price","cover_image_url",
       "gallery","description","status","seo_title","seo_description",
       "seo_canonical_url","seo_og_image",
     ];

@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
-import { supabaseServer } from "@/lib/supabase-client";
+import { useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { createClient } from "@/lib/supabase-client";
 
 export default function AuthPage() {
+	const router = useRouter();
+	const searchParams = useSearchParams();
 	const [mode, setMode] = useState<"login" | "signup">("login");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -11,20 +14,12 @@ export default function AuthPage() {
 	const [message, setMessage] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
-	const supabase = supabaseServer();
+	// 2. Use the standard Supabase browser client
+	const supabase = createClient();
 
-	async function syncAdminCookie() {
-		const {
-			data: { session },
-		} = await supabase.auth.getSession();
-		const token = session?.access_token;
-		await fetch("/api/auth/sync-admin", {
-			method: "POST",
-			cache: "no-store",
-			// 🔑 Send the Bearer token so the server can fetch the correct user
-			headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-		});
-	}
+	// 3. The entire `syncAdminCookie` function has been removed. It is not needed.
+
+	// 4. The `useEffect` hook has also been removed. The new library handles this flow automatically.
 
 	async function handleEmailPassword(e: React.FormEvent) {
 		e.preventDefault();
@@ -45,40 +40,35 @@ export default function AuthPage() {
 						password,
 					});
 					if (error) throw error;
-					setMessage("Account created. You are now signed in.");
+					setMessage(
+						"Account created. Please check your email to verify your account."
+					);
 				}
 
-				await syncAdminCookie();
+				// 5. This is the new, correct way to handle redirects in Next.js 13+
+				
+				// router.refresh() makes a new request to the server, which will re-run
+				// your `requireAdmin` check. This time, it will find the new session cookies.
+				router.refresh();
 
-				const {
-					data: { user },
-				} = await supabase.auth.getUser();
-				const roles = ((user?.app_metadata as any)?.roles ??
-					[]) as string[];
-				const isAdmin = roles.includes("admin");
+				// Redirect to the page the user was trying to access, or a default.
+				const nextUrl = searchParams.get("next") || "/admin";
+				router.push(nextUrl);
 
-				window.location.assign(isAdmin ? "/admin" : "/");
 			} catch (err: any) {
 				setError(err?.message ?? "Something went wrong.");
 			}
 		});
 	}
 
-	// If you return from an OAuth redirect back to /auth, sync cookie once.
-	useEffect(() => {
-		(async () => {
-			const {
-				data: { session },
-			} = await supabase.auth.getSession();
-			if (session) await syncAdminCookie();
-		})();
-	}, []);
-
 	async function handleOAuth(provider: "google" | "github" | "azure") {
 		setError(null);
 		const { error } = await supabase.auth.signInWithOAuth({
 			provider,
-			options: { redirectTo: `${window.location.origin}/auth` },
+			options: {
+				// It's standard practice to have a dedicated callback route
+				redirectTo: `${window.location.origin}/auth/callback`,
+			},
 		});
 		if (error) setError(error.message);
 	}
