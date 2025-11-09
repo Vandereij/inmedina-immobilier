@@ -1,7 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
 
 export default async function AdminDashboard() {
-	await requireAdmin();
 	return (
 		<div className="grid gap-3">
 			<div className="flex justify-center">

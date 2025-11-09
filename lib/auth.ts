@@ -5,8 +5,10 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 // Helper that works with both sync and async cookies()
 async function getCookieStore() {
-  const value = cookies();
-  return typeof (value as any).then === 'function' ? await value : value;
+  const v = cookies();
+  // Next 15+: cookies() returns a Promise; Next 14: it doesn't
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return typeof (v as any)?.then === 'function' ? await v : v;
 }
 
 export async function createSupabaseServerClient() {
@@ -17,13 +19,16 @@ export async function createSupabaseServerClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        // ✅ handle both sync/async cookies API
+        // Supply ONLY name/value pairs as expected by @supabase/ssr
         getAll() {
-          return store.getAll();
+          return store.getAll().map((c) => ({ name: c.name, value: c.value }));
         },
-        setAll(cookiesToSet) {
+        setAll(
+          cookiesToSet: { name: string; value: string; options?: CookieOptions }[]
+        ) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            store.set(name, value, options as CookieOptions);
+            // Object form is supported on Next 14/15+
+            store.set({ name, value, ...options });
           });
         },
       },
@@ -31,37 +36,34 @@ export async function createSupabaseServerClient() {
   );
 }
 
-// Optional: for API routes or server actions needing the Supabase session
 export async function getSession() {
   const supabase = await createSupabaseServerClient();
   const { data: { session } } = await supabase.auth.getSession();
-  return session;
+  return session ?? null;
 }
 
-// ✅ requireAdmin now trusts the httpOnly cookie created by /api/auth/sync-admin
+/**
+ * Server-side guard for admin-only routes/pages.
+ * - Redirects to /auth if not logged in
+ * - Redirects to /not-found if logged in but not an admin
+ * - Returns the user object if admin
+ */
 export async function requireAdmin() {
-  // 1. Create a server-side Supabase client
   const supabase = await createSupabaseServerClient();
 
-  // 2. Get the current user from the real session
   const { data: { user } } = await supabase.auth.getUser();
-
-  // 3. If there's no user, they are not logged in. Redirect.
   if (!user) {
-    redirect('/auth?next=/admin'); // Or your actual login page
+    // Send them to login and back to admin after
+    return redirect('/auth?next=/admin');
   }
 
-  // 4. Check if the user's metadata contains the 'admin' role.
-  //    This MUST match the check in your RLS policy.
-  const isAdmin = user.app_metadata?.roles?.includes('admin');
-
-  // 5. If the user is logged in but is NOT an admin, redirect them.
-  //    Redirecting to a 404 is often better than an "unauthorized" page
-  //    as it doesn't reveal that the protected page exists.
+  // Check against your public.admins table (via RPC)
+  const { data: isAdmin } = await supabase.rpc('is_admin');
   if (!isAdmin) {
-    redirect('/not-found');
+    // Hide existence of the route
+    return redirect('/not-found');
+    // or: notFound(); from 'next/navigation'
   }
 
-  // If all checks pass, you can optionally return the user object
   return user;
 }
