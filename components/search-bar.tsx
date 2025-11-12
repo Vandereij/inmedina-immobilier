@@ -45,6 +45,7 @@ interface PropertyRow {
 	bathrooms: number | null;
 	location_id: string | null;
 	availability_type: "sale" | "rent";
+	property_type: "riad" | "terrain";
 }
 
 export default function SearchBar() {
