@@ -49,7 +49,8 @@ interface PropertyRow {
 
 export default function SearchBar() {
 	// Filters
-	const [propertyType, setPropertyType] = useState<"rent" | "sale" | "">("");
+	const [availabilityType, setAvailabilityType] = useState<"rent" | "sale" | "">("");
+	const [propertyType, setPropertyType] = useState<"riad" | "terrain" | "">("");
 	const [locationId, setLocationId] = useState<string | "">("");
 	const [bedrooms, setBedrooms] = useState<string>("any");
 	const [bathrooms, setBathrooms] = useState<string>("any");
@@ -115,7 +116,8 @@ export default function SearchBar() {
 				}
 			);
 
-		if (propertyType) q = q.eq("availability_type", propertyType);
+		if (availabilityType) q = q.eq("availability_type", availabilityType);
+		if (propertyType) q = q.eq("property_type", propertyType);
 		if (locationId) q = q.eq("location_id", locationId);
 		if (bedrooms !== "any") q = q.eq("bedrooms", Number(bedrooms));
 		if (bathrooms !== "any") q = q.eq("bathrooms", Number(bathrooms));
@@ -186,7 +188,7 @@ export default function SearchBar() {
 			}
 		}
 		setLoadingFacets(false);
-	}, [propertyType, locationId, bedrooms, bathrooms, query]);
+	}, [availabilityType, propertyType, locationId, bedrooms, bathrooms, query]);
 
 	// Count results including current committed price range
 	const refreshCount = useCallback(async () => {
@@ -207,6 +209,7 @@ export default function SearchBar() {
 		setLoadingCount(false);
 		setResultsCount(!error && typeof count === "number" ? count : 0);
 	}, [
+		availabilityType,
 		propertyType,
 		locationId,
 		bedrooms,
@@ -236,7 +239,8 @@ export default function SearchBar() {
 
 	const onSearch = () => {
 		const params = new URLSearchParams({
-			availability_type: propertyType || "",
+			availability_type: availabilityType || "",
+			property_type: propertyType || "",
 			locationId: locationId || "",
 			bedrooms: bedrooms,
 			bathrooms: bathrooms,
@@ -252,10 +256,33 @@ export default function SearchBar() {
 	return (
 		<div className="mx-auto my-16 max-w-5xl rounded-2xl border bg-white p-6 shadow-sm">
 			{/* Top Row */}
-			<div className="grid grid-cols-1 items-end gap-4 md:grid-cols-5">
-				{/* Property Type */}
+			<div className="grid grid-cols-1 items-end gap-4 md:grid-cols-6">
+				{/* Availability Type */}
 				<div className="space-y-2 justify-items-center">
 					<Label className="text-sm">Availability type</Label>
+					<Select
+						value={availabilityType || "__all__"}
+						onValueChange={(v) =>
+							setAvailabilityType(v === "__all__" ? "" : (v as any))
+						}
+					>
+						<SelectTrigger className="justify-between">
+							<div className="flex items-center gap-2">
+								<Home className="h-4 w-4" />{" "}
+								<SelectValue placeholder="Rent or Sale" />
+							</div>
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="rent">Rent</SelectItem>
+							<SelectItem value="sale">Sale</SelectItem>
+							<SelectItem value="__all__">All</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+				
+				{/* Property Type */}
+				<div className="space-y-2 justify-items-center">
+					<Label className="text-sm">Property type</Label>
 					<Select
 						value={propertyType || "__all__"}
 						onValueChange={(v) =>
@@ -269,8 +296,8 @@ export default function SearchBar() {
 							</div>
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="rent">Rent</SelectItem>
-							<SelectItem value="sale">Sale</SelectItem>
+							<SelectItem value="riad">Riads</SelectItem>
+							<SelectItem value="terrain">Terrains</SelectItem>
 							<SelectItem value="__all__">All</SelectItem>
 						</SelectContent>
 					</Select>
