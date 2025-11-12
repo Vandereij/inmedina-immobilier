@@ -11,23 +11,49 @@ export default function Header() {
 	const pathname = usePathname();
 	const isAuthPage = pathname?.startsWith("/auth");
 	const isHomePage = pathname === "/";
-	const headerPosition = isHomePage ? 'absolute left-0 right-0' : ''
-	const linkColor = isHomePage ? 'text-white' : ''
-	const logoImage = isHomePage ? nmlogodark : nmlogo
+	const headerPosition = isHomePage ? "absolute left-0 right-0" : "";
+	const linkColor = isHomePage ? "text-white" : "";
+	const logoImage = isHomePage ? nmlogodark : nmlogo;
 
 	return (
 		<>
-			<header className={`pt-4 pb-16 flex items-center justify-center ${headerPosition}`}>
+			<header
+				className={`pt-4 pb-16 flex items-center justify-center ${headerPosition}`}
+			>
 				<div className="w-10/12">
 					<SocialLinks />
 					<div className="flex">
 						<nav className="flex w-full items-center justify-between">
 							<Link href="/" className="font-semibold text-lg">
-								<Image alt="InMedina Logo" src={logoImage} width={90} height={90}/>
+								<Image
+									alt="InMedina Logo"
+									src={logoImage}
+									width={90}
+									height={90}
+								/>
 							</Link>
 
 							<div className="flex gap-4">
-								<Button className={`${linkColor}`} size="sm" variant="link" asChild>
+								<Button
+									className={`${linkColor}`}
+									size="sm"
+									variant="link"
+									asChild
+								>
+									<Link
+										href="/"
+										className="hover:underline font-medium"
+									>
+										Home
+									</Link>
+								</Button>
+
+								<Button
+									className={`${linkColor}`}
+									size="sm"
+									variant="link"
+									asChild
+								>
 									<Link
 										href="/properties"
 										className="hover:underline font-medium"
@@ -36,7 +62,12 @@ export default function Header() {
 									</Link>
 								</Button>
 
-								<Button className={`${linkColor}`} size="sm" variant="link" asChild>
+								<Button
+									className={`${linkColor}`}
+									size="sm"
+									variant="link"
+									asChild
+								>
 									<Link
 										href="/blog"
 										className="hover:underline"
@@ -45,7 +76,35 @@ export default function Header() {
 									</Link>
 								</Button>
 
-								<Button className={`${linkColor}`} size="sm" variant="link" asChild>
+								<Button
+									className={`${linkColor}`}
+									size="sm"
+									variant="link"
+									asChild
+								>
+									<Link
+										href="/about-inmedina"
+										className="hover:underline"
+									>
+										Who We Are
+									</Link>
+								</Button>
+
+								<Button
+									className={`rounded-2xl`}
+									size="sm"
+									variant="secondary"
+									asChild
+								>
+									<Link href="/contact">Contact Us</Link>
+								</Button>
+
+								<Button
+									className={`${linkColor}`}
+									size="sm"
+									variant="link"
+									asChild
+								>
 									<Link
 										href="/admin"
 										className="hover:underline"
