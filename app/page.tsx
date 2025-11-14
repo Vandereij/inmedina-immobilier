@@ -18,7 +18,7 @@ export default async function HomePage() {
 						<div className="pt-65 pb-20 text-white">
 							<h1 className="text-5xl font-light">
 								<span className="uppercase">
-									InMedina Immobilier
+									Real Estate InMedina
 								</span>
 							</h1>
 							<h2 className="text-2xl font-normal">

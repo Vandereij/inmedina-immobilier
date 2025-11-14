@@ -12,16 +12,16 @@ export default function Header() {
 	const isAuthPage = pathname?.startsWith("/auth");
 	const isHomePage = pathname === "/";
 	const headerPosition = isHomePage ? "absolute left-0 right-0" : "";
-	const linkColor = isHomePage ? "text-white" : "";
+	const linkColor = isHomePage ? "text-secondary" : "text-secondary-foreground";
 	const logoImage = isHomePage ? nmlogodark : nmlogo;
 
 	return (
 		<>
 			<header
-				className={`pt-4 pb-16 flex items-center justify-center ${headerPosition}`}
+				className={`pt-4 pb-6 flex items-center justify-center ${headerPosition}`}
 			>
 				<div className="w-10/12">
-					<SocialLinks />
+					<SocialLinks isHomePage={isHomePage} />
 					<div className="flex">
 						<nav className="flex w-full items-center justify-between">
 							<Link href="/" className="font-semibold text-lg">
@@ -33,7 +33,7 @@ export default function Header() {
 								/>
 							</Link>
 
-							<div className="flex gap-4">
+							<div className="flex gap-4 transition-all">
 								<Button
 									className={`${linkColor}`}
 									size="sm"
