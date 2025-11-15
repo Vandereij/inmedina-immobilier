@@ -17,6 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AmenitiesForm } from "@/components/amenities-form";
+import { amenitiesTemplate } from "@/lib/amenities-template";
+import { deepMergeAmenities, Amenities } from "@/lib/utils";
 import {
 	Select,
 	SelectContent,
@@ -66,30 +69,88 @@ function TiptapToolbar({ editor }: { editor: any }) {
 
 	return (
 		<div className="border border-b-0 rounded-t-lg p-2 flex flex-wrap gap-1 bg-gray-50">
-			<Button type="button" variant={editor.isActive("bold") ? "secondary" : "ghost"} size="sm" onClick={() => editor.chain().focus().toggleBold().run()}>
+			<Button
+				type="button"
+				variant={editor.isActive("bold") ? "secondary" : "ghost"}
+				size="sm"
+				onClick={() => editor.chain().focus().toggleBold().run()}
+			>
 				<Bold className="h-4 w-4" />
 			</Button>
-			<Button type="button" variant={editor.isActive("italic") ? "secondary" : "ghost"} size="sm" onClick={() => editor.chain().focus().toggleItalic().run()}>
+			<Button
+				type="button"
+				variant={editor.isActive("italic") ? "secondary" : "ghost"}
+				size="sm"
+				onClick={() => editor.chain().focus().toggleItalic().run()}
+			>
 				<Italic className="h-4 w-4" />
 			</Button>
-			<Button type="button" variant={editor.isActive("underline") ? "secondary" : "ghost"} size="sm" onClick={() => editor.chain().focus().toggleUnderline().run()}>
+			<Button
+				type="button"
+				variant={editor.isActive("underline") ? "secondary" : "ghost"}
+				size="sm"
+				onClick={() => editor.chain().focus().toggleUnderline().run()}
+			>
 				<UnderlineIcon className="h-4 w-4" />
 			</Button>
 			<div className="w-px h-8 bg-gray-300 mx-1" />
-			<Button type="button" variant={editor.isActive("bulletList") ? "secondary" : "ghost"} size="sm" onClick={() => editor.chain().focus().toggleBulletList().run()}>
+			<Button
+				type="button"
+				variant={editor.isActive("bulletList") ? "secondary" : "ghost"}
+				size="sm"
+				onClick={() => editor.chain().focus().toggleBulletList().run()}
+			>
 				<List className="h-4 w-4" />
 			</Button>
-			<Button type="button" variant={editor.isActive("orderedList") ? "secondary" : "ghost"} size="sm" onClick={() => editor.chain().focus().toggleOrderedList().run()}>
+			<Button
+				type="button"
+				variant={editor.isActive("orderedList") ? "secondary" : "ghost"}
+				size="sm"
+				onClick={() => editor.chain().focus().toggleOrderedList().run()}
+			>
 				<ListOrdered className="h-4 w-4" />
 			</Button>
 			<div className="w-px h-8 bg-gray-300 mx-1" />
-			<Button type="button" variant={editor.isActive({ textAlign: "left" }) ? "secondary" : "ghost"} size="sm" onClick={() => editor.chain().focus().setTextAlign("left").run()}>
+			<Button
+				type="button"
+				variant={
+					editor.isActive({ textAlign: "left" })
+						? "secondary"
+						: "ghost"
+				}
+				size="sm"
+				onClick={() =>
+					editor.chain().focus().setTextAlign("left").run()
+				}
+			>
 				<AlignLeft className="h-4 w-4" />
 			</Button>
-			<Button type="button" variant={editor.isActive({ textAlign: "center" }) ? "secondary" : "ghost"} size="sm" onClick={() => editor.chain().focus().setTextAlign("center").run()}>
+			<Button
+				type="button"
+				variant={
+					editor.isActive({ textAlign: "center" })
+						? "secondary"
+						: "ghost"
+				}
+				size="sm"
+				onClick={() =>
+					editor.chain().focus().setTextAlign("center").run()
+				}
+			>
 				<AlignCenter className="h-4 w-4" />
 			</Button>
-			<Button type="button" variant={editor.isActive({ textAlign: "right" }) ? "secondary" : "ghost"} size="sm" onClick={() => editor.chain().focus().setTextAlign("right").run()}>
+			<Button
+				type="button"
+				variant={
+					editor.isActive({ textAlign: "right" })
+						? "secondary"
+						: "ghost"
+				}
+				size="sm"
+				onClick={() =>
+					editor.chain().focus().setTextAlign("right").run()
+				}
+			>
 				<AlignRight className="h-4 w-4" />
 			</Button>
 			<div className="w-px h-8 bg-gray-300 mx-1" />
@@ -100,10 +161,22 @@ function TiptapToolbar({ editor }: { editor: any }) {
 				<ImageIcon className="h-4 w-4" />
 			</Button>
 			<div className="w-px h-8 bg-gray-300 mx-1" />
-			<Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()}>
+			<Button
+				type="button"
+				variant="ghost"
+				size="sm"
+				onClick={() => editor.chain().focus().undo().run()}
+				disabled={!editor.can().undo()}
+			>
 				<Undo className="h-4 w-4" />
 			</Button>
-			<Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()}>
+			<Button
+				type="button"
+				variant="ghost"
+				size="sm"
+				onClick={() => editor.chain().focus().redo().run()}
+				disabled={!editor.can().redo()}
+			>
 				<Redo className="h-4 w-4" />
 			</Button>
 		</div>
@@ -130,10 +203,13 @@ export default function EditPropertyForm() {
 	const [title, setTitle] = useState("");
 	const [slug, setSlug] = useState("");
 	const [slugTouched, setSlugTouched] = useState(false);
-	const [availabilityType, setAvailabilityType] = useState<"sale" | "rent">("sale");
+	const [availabilityType, setAvailabilityType] = useState<"sale" | "rent">(
+		"sale"
+	);
 	const [price, setPrice] = useState<string>("");
 	const [cover, setCover] = useState<string>("");
 	const [gallery, setGallery] = useState<string[]>([]);
+	const [amenities, setAmenities] = useState<Amenities>(amenitiesTemplate);
 	const [seo, setSeo] = useState<SeoState>({
 		seo_title: "",
 		seo_description: "",
@@ -159,12 +235,20 @@ export default function EditPropertyForm() {
 	const [descriptionHTML, setDescriptionHTML] = useState<string>("");
 
 	// Locations
-	const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
+	const [locations, setLocations] = useState<{ id: string; name: string }[]>(
+		[]
+	);
 	const [locationsLoading, setLocationsLoading] = useState(false);
 
 	// Memoize extensions
 	const editorExtensions = useMemo(
-		() => [StarterKit, Underline, TextAlign.configure({ types: ["heading", "paragraph"] }), Link.configure({ openOnClick: false }), Image],
+		() => [
+			StarterKit,
+			Underline,
+			TextAlign.configure({ types: ["heading", "paragraph"] }),
+			Link.configure({ openOnClick: false }),
+			Image,
+		],
 		[]
 	);
 
@@ -172,7 +256,11 @@ export default function EditPropertyForm() {
 		extensions: editorExtensions,
 		content: "",
 		immediatelyRender: false,
-		editorProps: { attributes: { class: "prose prose-sm max-w-none focus:outline-none min-h-[300px] p-4" } },
+		editorProps: {
+			attributes: {
+				class: "prose prose-sm max-w-none focus:outline-none min-h-[300px] p-4",
+			},
+		},
 	});
 
 	function toNumberOrNull(v: any) {
@@ -186,7 +274,11 @@ export default function EditPropertyForm() {
 		let cancelled = false;
 		async function load() {
 			setLoading(true);
-			const { data, error } = await supabase.from("properties").select("*").eq("id", id).single();
+			const { data, error } = await supabase
+				.from("properties")
+				.select("*")
+				.eq("id", id)
+				.single();
 			if (error) {
 				console.error(error);
 				alert(error.message);
@@ -195,13 +287,31 @@ export default function EditPropertyForm() {
 			}
 			if (cancelled) return;
 
+			const savedAmenities: Amenities = data?.amenities || {};
+			const amenitiesData = Array.isArray(savedAmenities)
+				? savedAmenities[0]
+				: savedAmenities;
+			setAmenities(
+				deepMergeAmenities(
+					amenitiesData as Partial<typeof amenitiesTemplate>
+				)
+			);
 			setTitle(data?.title || "");
 			setSlug(data?.slug || "");
 			setAvailabilityType((data?.availability_type as any) || "sale");
 			setPrice(data?.price != null ? String(data.price) : "");
 			setCover(data?.cover_image_url || "");
-			setGallery(Array.isArray(data?.gallery) ? data.gallery.map((g: any) => g?.url || g).filter(Boolean) : []);
-			setSeo({ seo_title: data?.seo_title || "", seo_description: data?.seo_description || "", seo_canonical: data?.seo_canonical || "", seo_robots: data?.seo_robots || "" });
+			setGallery(
+				Array.isArray(data?.gallery)
+					? data.gallery.map((g: any) => g?.url || g).filter(Boolean)
+					: []
+			);
+			setSeo({
+				seo_title: data?.seo_title || "",
+				seo_description: data?.seo_description || "",
+				seo_canonical: data?.seo_canonical || "",
+				seo_robots: data?.seo_robots || "",
+			});
 			setStatus((data?.status as any) || "draft");
 			setDescriptionHTML(data?.description || "");
 			setLocationId(data?.location_id ?? null);
@@ -227,7 +337,10 @@ export default function EditPropertyForm() {
 	useEffect(() => {
 		(async () => {
 			setLocationsLoading(true);
-			const { data, error } = await supabase.from("locations").select("id,name").order("name", { ascending: true });
+			const { data, error } = await supabase
+				.from("locations")
+				.select("id,name")
+				.order("name", { ascending: true });
 			if (error) console.error("Failed to load locations", error);
 			else setLocations(data || []);
 			setLocationsLoading(false);
@@ -244,11 +357,14 @@ export default function EditPropertyForm() {
 		const newErrors: Record<string, string> = {};
 		if (!title.trim()) newErrors.title = "Title is required";
 		if (!slug.trim()) newErrors.slug = "Slug is required";
-		else if (!/^[a-z0-9-]+$/.test(slug)) newErrors.slug = "Use lowercase letters, numbers, and hyphens only";
+		else if (!/^[a-z0-9-]+$/.test(slug))
+			newErrors.slug = "Use lowercase letters, numbers, and hyphens only";
 		const numeric = parseFloat(price || "");
-		if (!Number.isFinite(numeric) || numeric <= 0) newErrors.price = "Price must be greater than 0";
+		if (!Number.isFinite(numeric) || numeric <= 0)
+			newErrors.price = "Price must be greater than 0";
 		if (!cover) newErrors.cover = "Cover image is required";
-		if (!editor || !editor.getText().trim()) newErrors.description = "Description is required";
+		if (!editor || !editor.getText().trim())
+			newErrors.description = "Description is required";
 		if (!locationId) newErrors.location_id = "Location is required";
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
@@ -289,13 +405,17 @@ export default function EditPropertyForm() {
 				area_sqm: toNumberOrNull(areaSqm),
 				area_sqft: toNumberOrNull(areaSqft),
 				featured,
+				amenities: [amenities],
 				address_line1: address1,
 				address_line2: address2,
 				latitude: toNumberOrNull(latitude),
 				longitude: toNumberOrNull(longitude),
 				excerpt,
 			};
-			const { error } = await supabase.from("properties").update(payload).eq("id", id);
+			const { error } = await supabase
+				.from("properties")
+				.update(payload)
+				.eq("id", id);
 			if (error) {
 				console.error(error);
 				alert(error.message || "Update failed");
@@ -312,11 +432,30 @@ export default function EditPropertyForm() {
 		setGallery((g) => g.filter((_, i) => i !== index));
 	}
 
+	function handleAmenityChange(
+		category: keyof Amenities,
+		key: string,
+		value: boolean | number
+	) {
+		setAmenities((prev) => ({
+			...prev,
+			[category]: {
+				...prev[category],
+				[key]: value,
+			},
+		}));
+	}
+
 	// Ensure slug uniqueness (excluding current record)
 	async function generateUniqueSlug(base: string, excludeId?: string) {
-		const { data, error } = await supabase.from("properties").select("id, slug").ilike("slug", `${base}%`);
+		const { data, error } = await supabase
+			.from("properties")
+			.select("id, slug")
+			.ilike("slug", `${base}%`);
 		if (error || !data) return base;
-		const taken = new Set(data.filter((r: any) => r.id !== excludeId).map((r: any) => r.slug));
+		const taken = new Set(
+			data.filter((r: any) => r.id !== excludeId).map((r: any) => r.slug)
+		);
 		if (!taken.has(base)) return base;
 		let i = 2;
 		while (taken.has(`${base}-${i}`)) i++;
@@ -326,7 +465,8 @@ export default function EditPropertyForm() {
 	if (loading) {
 		return (
 			<div className="min-h-[50vh] flex items-center justify-center text-muted-foreground">
-				<Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading property…
+				<Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading
+				property…
 			</div>
 		);
 	}
@@ -336,13 +476,35 @@ export default function EditPropertyForm() {
 			<div className="container mx-auto max-w-6xl px-4">
 				<div className="mb-6 flex items-end justify-between gap-4">
 					<div>
-						<h1 className="text-3xl font-bold tracking-tight">Edit Property</h1>
-						<p className="text-muted-foreground mt-1">Update an existing property listing</p>
+						<h1 className="text-3xl font-bold tracking-tight">
+							Edit Property
+						</h1>
+						<p className="text-muted-foreground mt-1">
+							Update an existing property listing
+						</p>
 					</div>
 					<div className="flex gap-2">
-						<Button type="button" variant="outline" onClick={() => save("draft")} disabled={saving}>Save Draft</Button>
-						<Button type="button" onClick={() => save("published")} disabled={saving}>
-							{saving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…</>) : ("Publish")}
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => save("draft")}
+							disabled={saving}
+						>
+							Save Draft
+						</Button>
+						<Button
+							type="button"
+							onClick={() => save("published")}
+							disabled={saving}
+						>
+							{saving ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+									Saving…
+								</>
+							) : (
+								"Publish"
+							)}
 						</Button>
 					</div>
 				</div>
@@ -353,11 +515,16 @@ export default function EditPropertyForm() {
 						<Card>
 							<CardHeader>
 								<CardTitle>Basic Information</CardTitle>
-								<CardDescription>Update the core details about the property</CardDescription>
+								<CardDescription>
+									Update the core details about the property
+								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div className="space-y-2">
-									<Label htmlFor="title">Title <span className="text-red-500">*</span></Label>
+									<Label htmlFor="title">
+										Title{" "}
+										<span className="text-red-500">*</span>
+									</Label>
 									<Input
 										id="title"
 										placeholder="Enter property title"
@@ -365,16 +532,31 @@ export default function EditPropertyForm() {
 										onChange={(e) => {
 											const v = e.target.value;
 											setTitle(v);
-											if (!slugTouched) setSlug(slugify(v));
-											if (errors.title) setErrors((prev) => ({ ...prev, title: "" }));
+											if (!slugTouched)
+												setSlug(slugify(v));
+											if (errors.title)
+												setErrors((prev) => ({
+													...prev,
+													title: "",
+												}));
 										}}
-										className={errors.title ? "border-red-500" : ""}
+										className={
+											errors.title ? "border-red-500" : ""
+										}
 									/>
-									{errors.title && (<p className="text-sm text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {errors.title}</p>)}
+									{errors.title && (
+										<p className="text-sm text-red-500 flex items-center gap-1">
+											<AlertCircle className="h-3 w-3" />{" "}
+											{errors.title}
+										</p>
+									)}
 								</div>
 
 								<div className="space-y-2">
-									<Label htmlFor="slug">Slug <span className="text-red-500">*</span></Label>
+									<Label htmlFor="slug">
+										Slug{" "}
+										<span className="text-red-500">*</span>
+									</Label>
 									<Input
 										id="slug"
 										placeholder="auto-generated-from-title"
@@ -382,34 +564,95 @@ export default function EditPropertyForm() {
 										onChange={(e) => {
 											setSlugTouched(true);
 											setSlug(slugify(e.target.value));
-											if (errors.slug) setErrors((prev) => ({ ...prev, slug: "" }));
+											if (errors.slug)
+												setErrors((prev) => ({
+													...prev,
+													slug: "",
+												}));
 										}}
-										onBlur={() => setSlug((s) => slugify(s || title))}
-										className={errors.slug ? "border-red-500" : ""}
+										onBlur={() =>
+											setSlug((s) => slugify(s || title))
+										}
+										className={
+											errors.slug ? "border-red-500" : ""
+										}
 									/>
-									{errors.slug && (<p className="text-sm text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {errors.slug}</p>)}
+									{errors.slug && (
+										<p className="text-sm text-red-500 flex items-center gap-1">
+											<AlertCircle className="h-3 w-3" />{" "}
+											{errors.slug}
+										</p>
+									)}
 								</div>
 
 								<div className="space-y-2">
-									<Label htmlFor="availability-type">Availability Type <span className="text-red-500">*</span></Label>
-									<Select value={availabilityType} onValueChange={(v: "sale" | "rent") => setAvailabilityType(v)}>
-										<SelectTrigger id="availability-type"><SelectValue /></SelectTrigger>
+									<Label htmlFor="availability-type">
+										Availability Type{" "}
+										<span className="text-red-500">*</span>
+									</Label>
+									<Select
+										value={availabilityType}
+										onValueChange={(v: "sale" | "rent") =>
+											setAvailabilityType(v)
+										}
+									>
+										<SelectTrigger id="availability-type">
+											<SelectValue />
+										</SelectTrigger>
 										<SelectContent>
-											<SelectItem value="sale">For Sale</SelectItem>
-											<SelectItem value="rent">For Rent</SelectItem>
+											<SelectItem value="sale">
+												For Sale
+											</SelectItem>
+											<SelectItem value="rent">
+												For Rent
+											</SelectItem>
 										</SelectContent>
 									</Select>
 								</div>
 
 								<div className="space-y-2">
-									<Label htmlFor="price">Price <span className="text-red-500">*</span></Label>
-									<Input id="price" type="number" placeholder="0" value={price} onChange={(e) => { setPrice(e.target.value); if (errors.price) setErrors((prev) => ({ ...prev, price: "" })); }} className={errors.price ? "border-red-500" : ""} min="0" step="0.01" />
-									{errors.price && (<p className="text-sm text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {errors.price}</p>)}
+									<Label htmlFor="price">
+										Price{" "}
+										<span className="text-red-500">*</span>
+									</Label>
+									<Input
+										id="price"
+										type="number"
+										placeholder="0"
+										value={price}
+										onChange={(e) => {
+											setPrice(e.target.value);
+											if (errors.price)
+												setErrors((prev) => ({
+													...prev,
+													price: "",
+												}));
+										}}
+										className={
+											errors.price ? "border-red-500" : ""
+										}
+										min="0"
+										step="0.01"
+									/>
+									{errors.price && (
+										<p className="text-sm text-red-500 flex items-center gap-1">
+											<AlertCircle className="h-3 w-3" />{" "}
+											{errors.price}
+										</p>
+									)}
 								</div>
 
 								<div className="flex items-center gap-3 pt-1">
-									<Checkbox id="featured" checked={featured} onCheckedChange={(v) => setFeatured(Boolean(v))} />
-									<Label htmlFor="featured">Is Featured</Label>
+									<Checkbox
+										id="featured"
+										checked={featured}
+										onCheckedChange={(v) =>
+											setFeatured(Boolean(v))
+										}
+									/>
+									<Label htmlFor="featured">
+										Is Featured
+									</Label>
 								</div>
 							</CardContent>
 						</Card>
@@ -417,21 +660,51 @@ export default function EditPropertyForm() {
 						<Card>
 							<CardHeader>
 								<CardTitle>Images</CardTitle>
-								<CardDescription>Update property images</CardDescription>
+								<CardDescription>
+									Update property images
+								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div className="space-y-2">
-									<Label>Cover Image <span className="text-red-500">*</span></Label>
+									<Label>
+										Cover Image{" "}
+										<span className="text-red-500">*</span>
+									</Label>
 									{cover && (
 										<div className="relative">
-											<img src={cover} alt="cover" className="w-full h-48 object-cover rounded-lg border" />
-											<Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-8 w-8" onClick={() => { setCover(""); if (errors.cover) setErrors((prev) => ({ ...prev, cover: "" })); }}>
+											<img
+												src={cover}
+												alt="cover"
+												className="w-full h-48 object-cover rounded-lg border"
+											/>
+											<Button
+												type="button"
+												variant="destructive"
+												size="icon"
+												className="absolute top-2 right-2 h-8 w-8"
+												onClick={() => {
+													setCover("");
+													if (errors.cover)
+														setErrors((prev) => ({
+															...prev,
+															cover: "",
+														}));
+												}}
+											>
 												<X className="h-4 w-4" />
 											</Button>
 										</div>
 									)}
-									<ImageUploader prefix="properties/" onUploaded={(url) => setCover(url)} />
-									{errors.cover && (<p className="text-sm text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {errors.cover}</p>)}
+									<ImageUploader
+										prefix="properties/"
+										onUploaded={(url) => setCover(url)}
+									/>
+									{errors.cover && (
+										<p className="text-sm text-red-500 flex items-center gap-1">
+											<AlertCircle className="h-3 w-3" />{" "}
+											{errors.cover}
+										</p>
+									)}
 								</div>
 
 								<div className="space-y-2">
@@ -439,17 +712,47 @@ export default function EditPropertyForm() {
 									{gallery.length > 0 && (
 										<div className="grid grid-cols-3 gap-2">
 											{gallery.map((u, i) => (
-												<div key={i} className="relative group">
-													<img src={u} alt={`gallery-${i}`} className="w-full h-24 object-cover rounded-lg border" />
-													<Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setGallery((g) => g.filter((_, idx) => idx !== i))}>
+												<div
+													key={i}
+													className="relative group"
+												>
+													<img
+														src={u}
+														alt={`gallery-${i}`}
+														className="w-full h-24 object-cover rounded-lg border"
+													/>
+													<Button
+														type="button"
+														variant="destructive"
+														size="icon"
+														className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+														onClick={() =>
+															setGallery((g) =>
+																g.filter(
+																	(_, idx) =>
+																		idx !==
+																		i
+																)
+															)
+														}
+													>
 														<X className="h-3 w-3" />
 													</Button>
 												</div>
 											))}
 										</div>
 									)}
-									<ImageUploader prefix="properties/" onUploaded={(url) => setGallery((g) => [...g, url])} />
+									<ImageUploader
+										prefix="properties/"
+										onUploaded={(url) =>
+											setGallery((g) => [...g, url])
+										}
+									/>
 								</div>
+								<AmenitiesForm
+									amenities={amenities}
+									onAmenitiesChange={handleAmenityChange}
+								/>
 							</CardContent>
 						</Card>
 					</div>
@@ -459,15 +762,31 @@ export default function EditPropertyForm() {
 						<Card>
 							<CardHeader>
 								<CardTitle>Description</CardTitle>
-								<CardDescription>Describe the property in detail</CardDescription>
+								<CardDescription>
+									Describe the property in detail
+								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-2">
-								<Label>Content <span className="text-red-500">*</span></Label>
-								<div className={`border rounded-lg ${errors.description ? "border-red-500" : ""}`}>
+								<Label>
+									Content{" "}
+									<span className="text-red-500">*</span>
+								</Label>
+								<div
+									className={`border rounded-lg ${
+										errors.description
+											? "border-red-500"
+											: ""
+									}`}
+								>
 									<TiptapToolbar editor={editor} />
 									<EditorContent editor={editor} />
 								</div>
-								{errors.description && (<p className="text-sm text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {errors.description}</p>)}
+								{errors.description && (
+									<p className="text-sm text-red-500 flex items-center gap-1">
+										<AlertCircle className="h-3 w-3" />{" "}
+										{errors.description}
+									</p>
+								)}
 							</CardContent>
 						</Card>
 
@@ -475,37 +794,110 @@ export default function EditPropertyForm() {
 						<Card>
 							<CardHeader>
 								<CardTitle>Location & Address</CardTitle>
-								<CardDescription>Select the location and provide address details</CardDescription>
+								<CardDescription>
+									Select the location and provide address
+									details
+								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div className="space-y-2">
-									<Label htmlFor="location">Location <span className="text-red-500">*</span></Label>
-									<Select value={locationId ?? ""} onValueChange={(v) => { setLocationId(v || null); if (errors.location_id) setErrors((prev) => ({ ...prev, location_id: "" })); }} disabled={locationsLoading}>
-										<SelectTrigger id="location"><SelectValue placeholder={locationsLoading ? "Loading…" : "Select a location"} /></SelectTrigger>
+									<Label htmlFor="location">
+										Location{" "}
+										<span className="text-red-500">*</span>
+									</Label>
+									<Select
+										value={locationId ?? ""}
+										onValueChange={(v) => {
+											setLocationId(v || null);
+											if (errors.location_id)
+												setErrors((prev) => ({
+													...prev,
+													location_id: "",
+												}));
+										}}
+										disabled={locationsLoading}
+									>
+										<SelectTrigger id="location">
+											<SelectValue
+												placeholder={
+													locationsLoading
+														? "Loading…"
+														: "Select a location"
+												}
+											/>
+										</SelectTrigger>
 										<SelectContent>
-											{locations.map((loc) => (<SelectItem key={loc.id} value={String(loc.id)}>{loc.name}</SelectItem>))}
+											{locations.map((loc) => (
+												<SelectItem
+													key={loc.id}
+													value={String(loc.id)}
+												>
+													{loc.name}
+												</SelectItem>
+											))}
 										</SelectContent>
 									</Select>
-									{errors.location_id && (<p className="text-sm text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {errors.location_id}</p>)}
+									{errors.location_id && (
+										<p className="text-sm text-red-500 flex items-center gap-1">
+											<AlertCircle className="h-3 w-3" />{" "}
+											{errors.location_id}
+										</p>
+									)}
 								</div>
 
 								<div className="space-y-2">
-									<Label htmlFor="address1">Address line 1</Label>
-									<Input id="address1" value={address1} onChange={(e) => setAddress1(e.target.value)} />
+									<Label htmlFor="address1">
+										Address line 1
+									</Label>
+									<Input
+										id="address1"
+										value={address1}
+										onChange={(e) =>
+											setAddress1(e.target.value)
+										}
+									/>
 								</div>
 								<div className="space-y-2">
-									<Label htmlFor="address2">Address line 2</Label>
-									<Input id="address2" value={address2} onChange={(e) => setAddress2(e.target.value)} />
+									<Label htmlFor="address2">
+										Address line 2
+									</Label>
+									<Input
+										id="address2"
+										value={address2}
+										onChange={(e) =>
+											setAddress2(e.target.value)
+										}
+									/>
 								</div>
 
 								<div className="grid grid-cols-2 gap-4">
 									<div className="space-y-2">
-										<Label htmlFor="latitude">Latitude</Label>
-										<Input id="latitude" type="number" value={latitude} onChange={(e) => setLatitude(e.target.value)} step="any" />
+										<Label htmlFor="latitude">
+											Latitude
+										</Label>
+										<Input
+											id="latitude"
+											type="number"
+											value={latitude}
+											onChange={(e) =>
+												setLatitude(e.target.value)
+											}
+											step="any"
+										/>
 									</div>
 									<div className="space-y-2">
-										<Label htmlFor="longitude">Longitude</Label>
-										<Input id="longitude" type="number" value={longitude} onChange={(e) => setLongitude(e.target.value)} step="any" />
+										<Label htmlFor="longitude">
+											Longitude
+										</Label>
+										<Input
+											id="longitude"
+											type="number"
+											value={longitude}
+											onChange={(e) =>
+												setLongitude(e.target.value)
+											}
+											step="any"
+										/>
 									</div>
 								</div>
 							</CardContent>
@@ -515,28 +907,72 @@ export default function EditPropertyForm() {
 						<Card>
 							<CardHeader>
 								<CardTitle>Property Details</CardTitle>
-								<CardDescription>Bedrooms, bathrooms and area sizes</CardDescription>
+								<CardDescription>
+									Bedrooms, bathrooms and area sizes
+								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div className="grid grid-cols-2 gap-4">
 									<div className="space-y-2">
-										<Label htmlFor="bedrooms">Number of bedrooms</Label>
-										<Input id="bedrooms" type="number" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} min="0" />
+										<Label htmlFor="bedrooms">
+											Number of bedrooms
+										</Label>
+										<Input
+											id="bedrooms"
+											type="number"
+											value={bedrooms}
+											onChange={(e) =>
+												setBedrooms(e.target.value)
+											}
+											min="0"
+										/>
 									</div>
 									<div className="space-y-2">
-										<Label htmlFor="bathrooms">Number of bathrooms</Label>
-										<Input id="bathrooms" type="number" value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} min="0" />
+										<Label htmlFor="bathrooms">
+											Number of bathrooms
+										</Label>
+										<Input
+											id="bathrooms"
+											type="number"
+											value={bathrooms}
+											onChange={(e) =>
+												setBathrooms(e.target.value)
+											}
+											min="0"
+										/>
 									</div>
 								</div>
 
 								<div className="grid grid-cols-2 gap-4">
 									<div className="space-y-2">
-										<Label htmlFor="area_sqm">Area in sqm</Label>
-										<Input id="area_sqm" type="number" value={areaSqm} onChange={(e) => setAreaSqm(e.target.value)} min="0" step="0.01" />
+										<Label htmlFor="area_sqm">
+											Area in sqm
+										</Label>
+										<Input
+											id="area_sqm"
+											type="number"
+											value={areaSqm}
+											onChange={(e) =>
+												setAreaSqm(e.target.value)
+											}
+											min="0"
+											step="0.01"
+										/>
 									</div>
 									<div className="space-y-2">
-										<Label htmlFor="area_sqft">Area in sqft</Label>
-										<Input id="area_sqft" type="number" value={areaSqft} onChange={(e) => setAreaSqft(e.target.value)} min="0" step="0.01" />
+										<Label htmlFor="area_sqft">
+											Area in sqft
+										</Label>
+										<Input
+											id="area_sqft"
+											type="number"
+											value={areaSqft}
+											onChange={(e) =>
+												setAreaSqft(e.target.value)
+											}
+											min="0"
+											step="0.01"
+										/>
 									</div>
 								</div>
 							</CardContent>
@@ -546,17 +982,27 @@ export default function EditPropertyForm() {
 						<Card>
 							<CardHeader>
 								<CardTitle>Excerpt</CardTitle>
-								<CardDescription>Short summary for cards and SEO</CardDescription>
+								<CardDescription>
+									Short summary for cards and SEO
+								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Textarea id="excerpt" placeholder="Write a short 1–2 sentence summary…" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} className="min-h-[100px]" />
+								<Textarea
+									id="excerpt"
+									placeholder="Write a short 1–2 sentence summary…"
+									value={excerpt}
+									onChange={(e) => setExcerpt(e.target.value)}
+									className="min-h-[100px]"
+								/>
 							</CardContent>
 						</Card>
 
 						<Card>
 							<CardHeader>
 								<CardTitle>SEO Settings</CardTitle>
-								<CardDescription>Optimize your listing for search</CardDescription>
+								<CardDescription>
+									Optimize your listing for search
+								</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<SeoFields value={seo} onChange={setSeo} />
@@ -566,16 +1012,42 @@ export default function EditPropertyForm() {
 						{Object.keys(errors).length > 0 && (
 							<Alert variant="destructive">
 								<AlertCircle className="h-4 w-4" />
-								<AlertDescription>Please fix the validation errors before saving.</AlertDescription>
+								<AlertDescription>
+									Please fix the validation errors before
+									saving.
+								</AlertDescription>
 							</Alert>
 						)}
 
 						<div className="flex gap-2">
-							<Button onClick={() => save("draft")} disabled={saving} variant="outline" className="w-1/2">
-								{saving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…</>) : ("Save Draft")}
+							<Button
+								onClick={() => save("draft")}
+								disabled={saving}
+								variant="outline"
+								className="w-1/2"
+							>
+								{saving ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+										Saving…
+									</>
+								) : (
+									"Save Draft"
+								)}
 							</Button>
-							<Button onClick={() => save("published")} disabled={saving} className="w-1/2">
-								{saving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…</>) : ("Publish")}
+							<Button
+								onClick={() => save("published")}
+								disabled={saving}
+								className="w-1/2"
+							>
+								{saving ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+										Saving…
+									</>
+								) : (
+									"Publish"
+								)}
 							</Button>
 						</div>
 					</div>
