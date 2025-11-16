@@ -2,7 +2,6 @@
 
 export const amenitiesTemplate = {
   architectural_and_traditional: {
-    riad: false,
     central_courtyard: false,
     courtyard_fountain: false,
     bhou_lounge: false,

@@ -51,6 +51,7 @@ import {
 import { AmenitiesForm } from "@/components/amenities-form";
 import { amenitiesTemplate } from "@/lib/amenities-template";
 import { deepMergeAmenities, Amenities } from "@/lib/utils";
+import { AddressMapLookup } from "@/components/address-map-lookup";
 
 // ---------- Types ----------
 type SeoState = {
@@ -726,7 +727,14 @@ export default function NewPropertyForm() {
 										}
 									/>
 								</div>
-
+								<AddressMapLookup
+									onCoordinatesFound={(data) => {
+										setLatitude(String(data.lat));
+										setLongitude(String(data.lng));
+										setAddress1(data.addressLine1);
+										setAddress2(data.addressLine2);
+									}}
+								/>
 								<div className="grid grid-cols-2 gap-4">
 									<div className="space-y-2">
 										<Label htmlFor="latitude">
@@ -920,6 +928,8 @@ export default function NewPropertyForm() {
 									)}
 									<ImageUploader
 										prefix="properties/"
+										multiple={true}
+										maxFiles={10}
 										onUploaded={(url) =>
 											setGallery((g) => [...g, url])
 										}

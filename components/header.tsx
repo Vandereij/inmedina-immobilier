@@ -62,7 +62,7 @@ export default function Header() {
 									</Link>
 								</Button>
 
-								<Button
+								{/* <Button
 									className={`${linkColor}`}
 									size="sm"
 									variant="link"
@@ -74,7 +74,7 @@ export default function Header() {
 									>
 										Blog
 									</Link>
-								</Button>
+								</Button> */}
 
 								<Button
 									className={`${linkColor}`}

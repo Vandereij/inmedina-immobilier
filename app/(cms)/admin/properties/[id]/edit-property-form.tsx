@@ -52,6 +52,7 @@ import {
 	Undo,
 	Redo,
 } from "lucide-react";
+import { AddressMapLookup } from "@/components/address-map-lookup";
 
 // ---------- Tiptap Toolbar ----------
 function TiptapToolbar({ editor }: { editor: any }) {
@@ -206,6 +207,9 @@ export default function EditPropertyForm() {
 	const [availabilityType, setAvailabilityType] = useState<"sale" | "rent">(
 		"sale"
 	);
+	const [propertyType, setPropertyType] = useState<"riad" | "apartment">(
+		"riad"
+	);
 	const [price, setPrice] = useState<string>("");
 	const [cover, setCover] = useState<string>("");
 	const [gallery, setGallery] = useState<string[]>([]);
@@ -299,6 +303,7 @@ export default function EditPropertyForm() {
 			setTitle(data?.title || "");
 			setSlug(data?.slug || "");
 			setAvailabilityType((data?.availability_type as any) || "sale");
+			setPropertyType((data?.property_type as any) || "riad");
 			setPrice(data?.price != null ? String(data.price) : "");
 			setCover(data?.cover_image_url || "");
 			setGallery(
@@ -390,6 +395,7 @@ export default function EditPropertyForm() {
 				title,
 				slug: uniqueSlug,
 				availability_type: availabilityType,
+				property_type: propertyType,
 				price: parseFloat(price || "0"),
 				cover_image_url: cover,
 				gallery: gallery.map((u) => ({ url: u })),
@@ -611,6 +617,31 @@ export default function EditPropertyForm() {
 								</div>
 
 								<div className="space-y-2">
+									<Label htmlFor="property-type">
+										Property Type{" "}
+										<span className="text-red-500">*</span>
+									</Label>
+									<Select
+										value={propertyType}
+										onValueChange={(
+											value: "riad" | "apartment"
+										) => setPropertyType(value)}
+									>
+										<SelectTrigger id="property-type">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="riad">
+												Riad
+											</SelectItem>
+											<SelectItem value="apartment">
+												Apartment
+											</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+
+								<div className="space-y-2">
 									<Label htmlFor="price">
 										Price{" "}
 										<span className="text-red-500">*</span>
@@ -744,6 +775,8 @@ export default function EditPropertyForm() {
 									)}
 									<ImageUploader
 										prefix="properties/"
+										multiple={true}
+										maxFiles={10}
 										onUploaded={(url) =>
 											setGallery((g) => [...g, url])
 										}
@@ -869,7 +902,14 @@ export default function EditPropertyForm() {
 										}
 									/>
 								</div>
-
+								<AddressMapLookup
+									onCoordinatesFound={(data) => {
+										setLatitude(String(data.lat));
+										setLongitude(String(data.lng));
+										setAddress1(data.addressLine1);
+										setAddress2(data.addressLine2);
+									}}
+								/>
 								<div className="grid grid-cols-2 gap-4">
 									<div className="space-y-2">
 										<Label htmlFor="latitude">
