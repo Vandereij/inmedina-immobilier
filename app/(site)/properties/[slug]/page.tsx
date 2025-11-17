@@ -4,6 +4,8 @@ import { formatLabel } from "@/lib/amenities-template";
 import type { Metadata } from "next";
 import { Check } from "lucide-react";
 import { PropertyGallery } from "@/components/property-gallery";
+import Image from "next/image";
+import nmlogo from "../../../../public/nmlogo.png";
 
 type Props = {
 	params: Promise<{ slug: string }>;
@@ -43,21 +45,20 @@ export default async function PropertyDetail({ params }: Props) {
 	if (!property || property.status !== "published") return notFound();
 
 	// --- Placeholder Data for New Sections ---
-	const agent = {
-		name: "John Appleseed",
-		title: "Lead Real Estate Agent",
+	const inmedina = {
+		title: "InMedina Team is here to respond to all your enquiries. Don't esitate to contact us via the form or WhatsApp",
 		imageUrl: "https://via.placeholder.com/100", // Placeholder image
 	};
 
 	const floorPlanUrl = property.floor_plan_image_url; // Placeholder
 	const virtualTourUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ"; // Placeholder
-	const neighborhoodInfo = {
-		title: "A Vibrant and Welcoming Community",
-		description:
-			"<p>Located in a serene and sought-after neighborhood, this property offers the perfect blend of peaceful living and urban convenience. Enjoy easy access to top-rated schools, lush green parks, and a variety of boutique shops and gourmet restaurants. The community is known for its friendly atmosphere and beautifully maintained public spaces, making it an ideal place to call home.</p>",
-	};
-	// A real implementation would use property.latitude, property.longitude
-	const mapEmbedUrl = `https://maps.google.com/maps?q=51.5074,-0.1278&hl=es;z=14&amp;output=embed`;
+
+	// Generate map embed URL from property coordinates
+	const mapEmbedUrl =
+		property.latitude && property.longitude
+			? `https://maps.google.com/maps?q=${property.latitude},${property.longitude}&hl=en;z=15&amp;output=embed`
+			: null;
+
 	function getAmenitiesFromProperty(propertyAmenities: any) {
 		if (!propertyAmenities || typeof propertyAmenities !== "object") {
 			return {};
@@ -246,32 +247,22 @@ export default async function PropertyDetail({ params }: Props) {
 							propertyTitle={property.title}
 						/>
 
-						{/* Neighborhood */}
-						{/* <section className="mb-12">
-							<h2 className="text-2xl font-light text-gray-800 mb-4">
-								{neighborhoodInfo.title}
-							</h2>
-							<div
-								className="prose prose-lg max-w-none font-light text-gray-600"
-								dangerouslySetInnerHTML={{
-									__html: neighborhoodInfo.description,
-								}}
-							/>
-						</section> */}
-
 						{/* Map */}
-						<section>
-							<h2 className="text-2xl font-light text-gray-800 mb-6">
-								Location
-							</h2>
-							<div className="h-[400px] w-full">
-								<iframe
-									src={mapEmbedUrl}
-									className="w-full h-full border-0 rounded-md"
-									loading="lazy"
-								></iframe>
-							</div>
-						</section>
+						{mapEmbedUrl && (
+							<section>
+								<h2 className="text-2xl font-light text-gray-800 mb-6">
+									Location
+								</h2>
+								<div className="h-[400px] w-full">
+									<iframe
+										src={mapEmbedUrl}
+										className="w-full h-full border-0 rounded-md"
+										loading="lazy"
+										title="Property location map"
+									></iframe>
+								</div>
+							</section>
+						)}
 					</div>
 
 					{/* --- Sidebar / Agent Contact --- */}
@@ -279,20 +270,18 @@ export default async function PropertyDetail({ params }: Props) {
 						<div className="sticky top-24">
 							<div className="border border-gray-200 rounded-lg p-8 shadow-sm">
 								<h3 className="text-xl font-medium text-gray-800 mb-6">
-									Contact Agent
+									Contact for more information
 								</h3>
 								<div className="flex items-center space-x-4 mb-6">
-									<img
-										src={agent.imageUrl}
-										alt={agent.name}
-										className="w-16 h-16 rounded-full object-cover"
-									/>
+										<Image
+											alt="InMedina Logo"
+											src={nmlogo}
+											width={70}
+											height={70}
+										/>
 									<div>
-										<div className="font-medium text-gray-800">
-											{agent.name}
-										</div>
 										<div className="text-sm text-gray-500">
-											{agent.title}
+											{inmedina.title}
 										</div>
 									</div>
 								</div>
