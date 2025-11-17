@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 	const { data: property, error } = await supabase
 		.from("properties")
-		.select("title, seo_description, status")
+		.select("seo_title, seo_description, status")
 		.eq("slug", slug)
 		.maybeSingle();
 
@@ -26,9 +26,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	}
 
 	return {
-		title: property.title,
+		title: property.seo_title,
 		description:
-			property.seo_description || `View details for ${property.title}`,
+			property.seo_description || `View details for ${property.seo_title}`,
 	};
 }
 
@@ -46,8 +46,7 @@ export default async function PropertyDetail({ params }: Props) {
 
 	// --- Placeholder Data for New Sections ---
 	const inmedina = {
-		title: "InMedina Team is here to respond to all your enquiries. Don't esitate to contact us via the form or WhatsApp",
-		imageUrl: "https://via.placeholder.com/100", // Placeholder image
+		title: "InMedina Team is here to respond to all your enquiries. Don't esitate to contact us via the form or WhatsApp"
 	};
 
 	const floorPlanUrl = property.floor_plan_image_url; // Placeholder

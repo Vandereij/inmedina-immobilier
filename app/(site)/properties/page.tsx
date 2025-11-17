@@ -14,8 +14,16 @@ import {
 	LucideMapPin,
 	LucideRulerDimensionLine,
 } from "lucide-react";
+import { Metadata } from "next";
 
 export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+	return {
+		title: '',
+		description: '',
+	};
+}
 
 export default async function PropertiesPage({
 	searchParams,

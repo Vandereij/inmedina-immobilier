@@ -14,12 +14,7 @@ export default function AuthPage() {
 	const [message, setMessage] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
-	// 2. Use the standard Supabase browser client
 	const supabase = createClient();
-
-	// 3. The entire `syncAdminCookie` function has been removed. It is not needed.
-
-	// 4. The `useEffect` hook has also been removed. The new library handles this flow automatically.
 
 	async function handleEmailPassword(e: React.FormEvent) {
 		e.preventDefault();
@@ -44,17 +39,10 @@ export default function AuthPage() {
 						"Account created. Please check your email to verify your account."
 					);
 				}
-
-				// 5. This is the new, correct way to handle redirects in Next.js 13+
-				
-				// router.refresh() makes a new request to the server, which will re-run
-				// your `requireAdmin` check. This time, it will find the new session cookies.
 				router.refresh();
 
-				// Redirect to the page the user was trying to access, or a default.
 				const nextUrl = searchParams.get("next") || "/admin";
 				router.push(nextUrl);
-
 			} catch (err: any) {
 				setError(err?.message ?? "Something went wrong.");
 			}
@@ -66,7 +54,6 @@ export default function AuthPage() {
 		const { error } = await supabase.auth.signInWithOAuth({
 			provider,
 			options: {
-				// It's standard practice to have a dedicated callback route
 				redirectTo: `${window.location.origin}/auth/callback`,
 			},
 		});
@@ -140,7 +127,7 @@ export default function AuthPage() {
 								: "Sign up"}
 						</button>
 					</form>
-
+					{/* 
 					<div className="text-center text-sm text-gray-500">or</div>
 
 					<div className="grid gap-2">
@@ -151,7 +138,7 @@ export default function AuthPage() {
 						>
 							Continue with Google
 						</button>
-					</div>
+					</div> */}
 
 					{message && (
 						<div className="text-green-600 text-sm">{message}</div>
