@@ -210,6 +210,9 @@ export default function EditPropertyForm() {
 	const [propertyType, setPropertyType] = useState<"riad" | "apartment">(
 		"riad"
 	);
+	const [propertyStatus, setPropertyStatus] = useState<"new" | "under_offer" | "sold">(
+		"new"
+	);
 	const [price, setPrice] = useState<string>("");
 	const [cover, setCover] = useState<string>("");
 	const [floorPlan, setFloorPlan] = useState<string>("");
@@ -305,6 +308,7 @@ export default function EditPropertyForm() {
 			setSlug(data?.slug || "");
 			setAvailabilityType((data?.availability_type as any) || "sale");
 			setPropertyType((data?.property_type as any) || "riad");
+			setPropertyStatus((data?.property_status as any) || "new");
 			setPrice(data?.price != null ? String(data.price) : "");
 			setCover(data?.cover_image_url || "");
 			setFloorPlan(data?.floor_plan_image_url || "");
@@ -398,6 +402,7 @@ export default function EditPropertyForm() {
 				slug: uniqueSlug,
 				availability_type: availabilityType,
 				property_type: propertyType,
+				property_status: propertyStatus,
 				price: parseFloat(price || "0"),
 				cover_image_url: cover,
 				floor_plan_image_url: floorPlan,
@@ -639,6 +644,34 @@ export default function EditPropertyForm() {
 											</SelectItem>
 											<SelectItem value="apartment">
 												Apartment
+											</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+
+								<div className="space-y-2">
+									<Label htmlFor="property-status">
+										Property Status{" "}
+										<span className="text-red-500">*</span>
+									</Label>
+									<Select
+										value={propertyStatus}
+										onValueChange={(
+											value: "new" | "under_offer" | "sold"
+										) => setPropertyStatus(value)}
+									>
+										<SelectTrigger id="property-status">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="new">
+												New
+											</SelectItem>
+											<SelectItem value="under_offer">
+												Under Offer
+											</SelectItem>
+											<SelectItem value="sold">
+												Sold
 											</SelectItem>
 										</SelectContent>
 									</Select>

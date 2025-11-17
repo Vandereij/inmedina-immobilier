@@ -248,6 +248,9 @@ export default function NewPropertyForm() {
 	const [propertyType, setPropertyType] = useState<"riad" | "apartment">(
 		"riad"
 	);
+	const [propertyStatus, setPropertyStatus] = useState<"new" | "under_offer" | "sold">(
+		"new"
+	);
 	const [price, setPrice] = useState<string>("");
 	const [cover, setCover] = useState("");
 	const [floorPlan, setFloorPlan] = useState<string>("");
@@ -360,6 +363,7 @@ export default function NewPropertyForm() {
 					slug: uniqueSlug,
 					property_type: propertyType,
 					availability_type: availabilityType,
+					property_status: propertyStatus,
 					price: parseFloat(price || "0"),
 					cover_image_url: cover,
 					floor_plan_image_url: floorPlan,
@@ -597,6 +601,34 @@ export default function NewPropertyForm() {
 											</SelectItem>
 											<SelectItem value="rent">
 												For Rent
+											</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+
+								<div className="space-y-2">
+									<Label htmlFor="property-status">
+										Property Status{" "}
+										<span className="text-red-500">*</span>
+									</Label>
+									<Select
+										value={propertyStatus}
+										onValueChange={(
+											value: "new" | "under_offer" | "sold"
+										) => setPropertyStatus(value)}
+									>
+										<SelectTrigger id="property-status">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="new">
+												New
+											</SelectItem>
+											<SelectItem value="under_offer">
+												Under Offer
+											</SelectItem>
+											<SelectItem value="sold">
+												Sold
 											</SelectItem>
 										</SelectContent>
 									</Select>
