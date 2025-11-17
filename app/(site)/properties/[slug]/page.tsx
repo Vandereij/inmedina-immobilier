@@ -49,7 +49,7 @@ export default async function PropertyDetail({ params }: Props) {
 		imageUrl: "https://via.placeholder.com/100", // Placeholder image
 	};
 
-	const floorPlanUrl = "https://placehold.co/700x200?text=Floor+Plan"; // Placeholder
+	const floorPlanUrl = property.floor_plan_image_url; // Placeholder
 	const virtualTourUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ"; // Placeholder
 	const neighborhoodInfo = {
 		title: "A Vibrant and Welcoming Community",
@@ -219,7 +219,7 @@ export default async function PropertyDetail({ params }: Props) {
 								<img
 									src={floorPlanUrl}
 									alt="Floor Plan"
-									className="w-full rounded-md border border-gray-200"
+									className="w-full aspect-3/1 object-contain rounded-md border border-gray-200 bg-gray-50"
 								/>
 							</section>
 						)}

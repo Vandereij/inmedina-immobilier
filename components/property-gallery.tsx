@@ -22,28 +22,22 @@ interface PropertyGalleryProps {
 }
 
 /**
- * PropertyGallery – polished UI/UX
+ * PropertyGallery – polished UI/UX (patched)
  *
- * Highlights
- * - Modern, asymmetric grid with a featured hero tile
- * - Blur-up thumbnails + smooth image zoom on hover
- * - Keyboard, focus, and touch (swipe) navigation
- * - Animated lightbox with cross‑fade and backdrop blur
- * - Preloads next/prev image for snappier navigation
- * - Accessible (aria labels, focus traps, escape to close)
+ * Fixes:
+ * 1) Handle cache hits so images don't stay blurred on reload
+ * 2) Eager-load first tiles (hero + a few) to avoid stuck blur with lazy
+ * 3) Stable keys based on URL to prevent DOM node reuse issues
+ * 4) Optional fetchPriority on hero for faster paint
  */
-export function PropertyGallery({
-	images,
-	propertyTitle,
-}: PropertyGalleryProps) {
+export function PropertyGallery({ images, propertyTitle }: PropertyGalleryProps) {
 	const [lightboxOpen, setLightboxOpen] = useState(false);
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [loaded, setLoaded] = useState<Record<number, boolean>>({});
 
 	// Normalize images to always have url property
 	const normalizedImages = useMemo(
-		() =>
-			images.map((img) => (typeof img === "string" ? { url: img } : img)),
+		() => images.map((img) => (typeof img === "string" ? { url: img } : img)),
 		[images]
 	);
 
@@ -120,10 +114,7 @@ export function PropertyGallery({
 						({total} {total === 1 ? "photo" : "photos"})
 					</span>
 				</h2>
-				<Button
-					onClick={() => openLightbox(0)}
-					className="flex items-center gap-2"
-				>
+				<Button onClick={() => openLightbox(0)} className="flex items-center gap-2">
 					<Maximize2 className="h-4 w-4" />
 					Open all
 				</Button>
@@ -141,6 +132,7 @@ export function PropertyGallery({
 						badge={`1 / ${total}`}
 						loaded={!!loaded[0]}
 						setLoaded={(v) => setLoaded((s) => ({ ...s, 0: v }))}
+						lazy={false}
 					/>
 				)}
 
@@ -148,9 +140,10 @@ export function PropertyGallery({
 				{visible.slice(1).map((img, i) => {
 					const idx = i + 1;
 					const isLastVisible = idx === 7 && remainingCount > 0;
+					const eager = idx <= 3; // eager-load a few above-the-fold tiles
 					return (
 						<GalleryTile
-							key={idx}
+							key={img.url ?? idx}
 							img={img}
 							index={idx}
 							onOpen={openLightbox}
@@ -159,20 +152,15 @@ export function PropertyGallery({
 								isLastVisible ? (
 									<div className="absolute inset-0 grid place-items-center bg-black/70">
 										<div className="text-white text-center">
-											<div className="text-4xl font-light">
-												+{remainingCount}
-											</div>
-											<div className="mt-1 text-xs tracking-widest">
-												MORE PHOTOS
-											</div>
+											<div className="text-4xl font-light">+{remainingCount}</div>
+											<div className="mt-1 text-xs tracking-widest">MORE PHOTOS</div>
 										</div>
 									</div>
 								) : undefined
 							}
 							loaded={!!loaded[idx]}
-							setLoaded={(v) =>
-								setLoaded((s) => ({ ...s, [idx]: v }))
-							}
+							setLoaded={(v) => setLoaded((s) => ({ ...s, [idx]: v }))}
+							lazy={!eager}
 						/>
 					);
 				})}
@@ -188,10 +176,7 @@ export function PropertyGallery({
 						transition={{ duration: 0.2 }}
 						className="fixed inset-0 z-50"
 					>
-						<div
-							className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-							onClick={closeLightbox}
-						/>
+						<div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeLightbox} />
 
 						<div
 							role="dialog"
@@ -239,9 +224,7 @@ export function PropertyGallery({
 									src={normalizedImages[currentIndex].url}
 									alt={
 										normalizedImages[currentIndex].alt ||
-										`${propertyTitle} - Image ${
-											currentIndex + 1
-										}`
+										`${propertyTitle} - Image ${currentIndex + 1}`
 									}
 									loading="eager"
 									className="max-h-[80vh] w-auto rounded-xl shadow-2xl ring-1 ring-white/10"
@@ -268,7 +251,7 @@ export function PropertyGallery({
 									<div className="flex gap-2 overflow-x-auto px-4 py-2">
 										{normalizedImages.map((img, i) => (
 											<button
-												key={i}
+												key={img.url ?? i}
 												onClick={(e) => {
 													e.stopPropagation();
 													setCurrentIndex(i);
@@ -278,17 +261,12 @@ export function PropertyGallery({
 														? "border-white scale-105"
 														: "border-transparent opacity-70 hover:opacity-100"
 												}`}
-												aria-label={`Go to image ${
-													i + 1
-												}`}
+												aria-label={`Go to image ${i + 1}`}
 											>
 												{/* eslint-disable-next-line @next/next/no-img-element */}
 												<img
 													src={img.url}
-													alt={
-														img.alt ||
-														`Thumbnail ${i + 1}`
-													}
+													alt={img.alt || `Thumbnail ${i + 1}`}
 													loading="lazy"
 													className="h-16 w-16 object-cover"
 												/>
@@ -315,6 +293,7 @@ function GalleryTile({
 	badge,
 	loaded,
 	setLoaded,
+	lazy = true,
 }: {
 	img: GalleryImage;
 	index: number;
@@ -324,7 +303,35 @@ function GalleryTile({
 	badge?: string;
 	loaded: boolean;
 	setLoaded: (v: boolean) => void;
+	lazy?: boolean;
 }) {
+	const imgRef = useRef<HTMLImageElement | null>(null);
+
+	// Handle cache hits + attach load/error listeners (guard against loops)
+	useEffect(() => {
+		// If we already marked this tile loaded, do nothing
+		if (loaded) return;
+
+		const el = imgRef.current;
+		if (!el) return;
+
+		// If the image is already cached and complete, mark loaded once
+		if (el.complete) {
+			setLoaded(true);
+			return;
+		}
+
+		const onLoad = () => setLoaded(true);
+		const onError = () => setLoaded(true); // avoid permanent blur on error
+
+		el.addEventListener("load", onLoad);
+		el.addEventListener("error", onError);
+		return () => {
+			el.removeEventListener("load", onLoad);
+			el.removeEventListener("error", onError);
+		};
+	}, [img.url, loaded]);
+
 	return (
 		<motion.button
 			type="button"
@@ -338,10 +345,12 @@ function GalleryTile({
 		>
 			{/* eslint-disable-next-line @next/next/no-img-element */}
 			<img
+				ref={imgRef}
 				src={img.url}
 				alt={img.alt || `Image ${index + 1}`}
-				loading="lazy"
-				onLoad={() => setLoaded(true)}
+				loading={lazy ? "lazy" : "eager"}
+				decoding="async"
+				{...(index === 0 ? ({ fetchPriority: "high" } as any) : {})}
 				className={
 					"h-full w-full object-cover transition duration-500 " +
 					(loaded ? "blur-0 scale-100" : "blur-sm scale-[1.02]") +

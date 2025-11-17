@@ -212,6 +212,7 @@ export default function EditPropertyForm() {
 	);
 	const [price, setPrice] = useState<string>("");
 	const [cover, setCover] = useState<string>("");
+	const [floorPlan, setFloorPlan] = useState<string>("");
 	const [gallery, setGallery] = useState<string[]>([]);
 	const [amenities, setAmenities] = useState<Amenities>(amenitiesTemplate);
 	const [seo, setSeo] = useState<SeoState>({
@@ -306,6 +307,7 @@ export default function EditPropertyForm() {
 			setPropertyType((data?.property_type as any) || "riad");
 			setPrice(data?.price != null ? String(data.price) : "");
 			setCover(data?.cover_image_url || "");
+			setFloorPlan(data?.floor_plan_image_url || "");
 			setGallery(
 				Array.isArray(data?.gallery)
 					? data.gallery.map((g: any) => g?.url || g).filter(Boolean)
@@ -398,6 +400,7 @@ export default function EditPropertyForm() {
 				property_type: propertyType,
 				price: parseFloat(price || "0"),
 				cover_image_url: cover,
+				floor_plan_image_url: floorPlan,
 				gallery: gallery.map((u) => ({ url: u })),
 				description: editor?.getHTML() || "",
 				status: nextStatus,
@@ -736,6 +739,33 @@ export default function EditPropertyForm() {
 											{errors.cover}
 										</p>
 									)}
+								</div>
+
+								{/* Floor Plan Image */}
+								<div className="space-y-2">
+									<Label>Floor Plan</Label>
+									{floorPlan && (
+										<div className="relative">
+											<img
+												src={floorPlan}
+												alt="floor plan"
+												className="w-full h-48 object-cover rounded-lg border"
+											/>
+											<Button
+												type="button"
+												variant="destructive"
+												size="icon"
+												className="absolute top-2 right-2 h-8 w-8"
+												onClick={() => setFloorPlan("")}
+											>
+												<X className="h-4 w-4" />
+											</Button>
+										</div>
+									)}
+									<ImageUploader
+										prefix="properties/"
+										onUploaded={(url) => setFloorPlan(url)}
+									/>
 								</div>
 
 								<div className="space-y-2">

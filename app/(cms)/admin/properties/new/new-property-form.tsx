@@ -250,6 +250,7 @@ export default function NewPropertyForm() {
 	);
 	const [price, setPrice] = useState<string>("");
 	const [cover, setCover] = useState("");
+	const [floorPlan, setFloorPlan] = useState<string>("");
 	const [gallery, setGallery] = useState<string[]>([]);
 	const [seo, setSeo] = useState<SeoState>({
 		seo_title: "",
@@ -361,6 +362,7 @@ export default function NewPropertyForm() {
 					availability_type: availabilityType,
 					price: parseFloat(price || "0"),
 					cover_image_url: cover,
+					floor_plan_image_url: floorPlan,
 					gallery: gallery.map((u) => ({ url: u })),
 					description: editor?.getHTML() || "",
 					status: finalStatus,
@@ -895,6 +897,33 @@ export default function NewPropertyForm() {
 									)}
 								</div>
 
+								{/* Floor Plan Image */}
+								<div className="space-y-2">
+									<Label>Floor Plan</Label>
+									{floorPlan && (
+										<div className="relative">
+											<img
+												src={floorPlan}
+												alt="floor plan"
+												className="w-full h-48 object-cover rounded-lg border"
+											/>
+											<Button
+												type="button"
+												variant="destructive"
+												size="icon"
+												className="absolute top-2 right-2 h-8 w-8"
+												onClick={() => setFloorPlan("")}
+											>
+												<X className="h-4 w-4" />
+											</Button>
+										</div>
+									)}
+									<ImageUploader
+										prefix="properties/"
+										onUploaded={(url) => setFloorPlan(url)}
+									/>
+								</div>
+
 								<div className="space-y-2">
 									<Label>Gallery Images</Label>
 									{gallery.length > 0 && (
@@ -935,12 +964,12 @@ export default function NewPropertyForm() {
 										}
 									/>
 								</div>
-								<AmenitiesForm
-									amenities={amenities}
-									onAmenitiesChange={handleAmenityChange}
-								/>
 							</CardContent>
 						</Card>
+						<AmenitiesForm
+							amenities={amenities}
+							onAmenitiesChange={handleAmenityChange}
+						/>
 					</div>
 
 					{/* Right Column */}
