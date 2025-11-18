@@ -267,7 +267,7 @@ export default function SearchBar() {
 							setAvailabilityType(v === "__all__" ? "" : (v as any))
 						}
 					>
-						<SelectTrigger className="justify-between rounded-2xl">
+						<SelectTrigger className="justify-between rounded-2xl max-md:w-xs">
 							<div className="flex items-center gap-2">
 								<Home className="h-4 w-4" />{" "}
 								<SelectValue placeholder="Rent or Sale" />
@@ -290,7 +290,7 @@ export default function SearchBar() {
 							setPropertyType(v === "__all__" ? "" : (v as any))
 						}
 					>
-						<SelectTrigger className="justify-between rounded-2xl">
+						<SelectTrigger className="justify-between rounded-2xl max-md:w-xs">
 							<div className="flex items-center gap-2">
 								<Home className="h-4 w-4" />{" "}
 								<SelectValue placeholder="Rent or Sale" />
@@ -313,7 +313,7 @@ export default function SearchBar() {
 							setLocationId(v === "__all__" ? "" : v)
 						}
 					>
-						<SelectTrigger className="mt-2 justify-between rounded-2xl">
+						<SelectTrigger className="mt-2 justify-between rounded-2xl max-md:w-xs">
 							<div className="flex items-center gap-2">
 								<MapPin className="h-4 w-4" />{" "}
 								<SelectValue placeholder="Select a location" />
@@ -337,7 +337,7 @@ export default function SearchBar() {
 						value={bedrooms}
 						onValueChange={(v) => setBedrooms(v)}
 					>
-						<SelectTrigger className="justify-between rounded-2xl">
+						<SelectTrigger className="justify-between rounded-2xl max-md:w-xs">
 							<div className="flex items-center gap-2">
 								<BedDouble className="h-4 w-4" />{" "}
 								<SelectValue placeholder="Any" />
@@ -361,7 +361,7 @@ export default function SearchBar() {
 						value={bathrooms}
 						onValueChange={(v) => setBathrooms(v)}
 					>
-						<SelectTrigger className="justify-between rounded-2xl">
+						<SelectTrigger className="justify-between rounded-2xl max-md:w-xs">
 							<div className="flex items-center gap-2">
 								<Bath className="h-4 w-4" />{" "}
 								<SelectValue placeholder="Any" />
