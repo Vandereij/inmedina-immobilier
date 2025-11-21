@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import nmlogo from "../public/nmlogo.png";
 import nmlogodark from "../public/nmlogodark.png";
+import nmlogosvg from "../public/nmlogo.svg"
 import { Menu, X } from "lucide-react";
 
 export default function Header() {
@@ -34,9 +35,9 @@ export default function Header() {
 							<Link href="/" className="font-semibold text-lg">
 								<Image
 									alt="InMedina Logo"
-									src={logoImage}
-									width={90}
-									height={90}
+									src={nmlogosvg}
+									width={40}
+									height={40}
 								/>
 							</Link>
 
