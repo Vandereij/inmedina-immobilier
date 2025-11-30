@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase-server";
 import { useMemo } from "react";
-import SearchBar from "@/components/search-bar";
+import Hero from "@/components/hero";
+import ContactCta from "@/components/contact-cta";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import PropertyCardList from "@/components/property-card-list";
+import Image from "next/image";
 
 export default async function HomePage() {
 	const supabase = await useMemo(() => createClient(), []);
@@ -12,149 +15,170 @@ export default async function HomePage() {
 		.order("name");
 	return (
 		<>
-			<section className="w-full grid h-fit gap-6  bg-cover bg-center bg-gray-400 bg-blend-multiply bg-[url(https://inmedina.com/wp-content/uploads/2024/03/riad-bamileke-suite-wide-shot.jpg)]">
-				<div className="flex justify-center">
-					<div className="w-10/12">
-						<div className="pt-65 pb-20 text-white">
-							<h1 className="text-5xl font-light">
-								<span className="uppercase">
-									Real Estate InMedina
-								</span>
-							</h1>
-							<h2 className="text-2xl font-normal">
-								Where Heritage Meets Modern Living
-							</h2>
-						</div>
-						<SearchBar />
-					</div>
-				</div>
-			</section>
-			<section className="pt-8 pb-30 flex flex-1 justify-center bg-radial-[100%_100%_at_50%_-10%] to-transparent via-card-foreground via-100% from-card-foreground text-secondary vision">
-				<div className="w-10/12 md:w-8/12">
-					<span className="flex pb-4 text-primary uppercase">
-						Our Vision
-					</span>
-					<h2 className="text-3xl font-medium">
-						For over 25 years, a trusted name in Moroccan
-						hospitality. Now, we're bringing that same passion and
-						expertise to help you find your perfect property in
-						Morocco.
-					</h2>
-					<div className="pt-6 grid grid-cols-6 gap-6">
-						<Button
-							asChild
-							className="col-start-2 col-span-2 bg-transparent border-2 border-accent text-accent-foreground"
-						>
-							<Link href="/properties">Explore Properties</Link>
-						</Button>
-						<Button asChild className="col-span-2">
-							<Link href="/contact">Contact Us</Link>
-						</Button>
-					</div>
-				</div>
-			</section>
-
-			<section className="pt-40 pb-20 flex flex-1 justify-center vision">
-				<div className="w-10/12 md:w-6/12">
-					<span className="flex pb-4 text-primary uppercase">
-						About InMedina
-					</span>
-					<div className="lg:flex lg:gap-20">
-						<h2 className="text-4xl font-medium">
-							Built on a Legacy of Excellence
+			<Hero />
+			<section className="bg-[#f8f3ee]">
+				<div className="mx-auto max-w-7xl px-4 py-20 md:px-8">
+					<div className="mb-10 flex items-center justify-between gap-4">
+						<h2 className="font-serif text-3xl md:text-4xl">
+							Featured Properties
 						</h2>
-						<p className="text-sm">
-							InMedina was founded by hospitality professionals
-							who have spent more than two decades welcoming
-							guests to Morocco's most beautiful accommodations.
-							Our deep understanding of what makes a space truly
-							special—from the play of light through traditional
-							zellige tiles to the perfect courtyard layout—now
-							guides our work in real estate and renovation. We
-							don't just sell properties. We help you discover
-							homes that capture the authentic spirit of Morocco
-							while meeting modern standards of comfort and
-							quality.
+						<Button
+							variant="link"
+							className="text-[#c98a5a]"
+							asChild
+						>
+							<Link href={"/properties?featured=true"}>
+								View all →
+							</Link>
+						</Button>
+					</div>
+					<PropertyCardList
+						status="published"
+						featured={true}
+						locations={locations || []}
+					/>
+				</div>
+			</section>
+			<section className="m-auto max-w-7xl pt-20 pb-20 px-4 md:px-8 vision md:grid md:gap-x-20 grid-cols-1 md:grid-cols-2 md:grid-rows-none">
+				<span className="max-w-lg pb-4 text-primary uppercase row-start-1 col-start-1 flex flex-none">
+					About InMedina
+				</span>
+				<h2 className="text-4xl max-w-lg row-start-2 col-start-1">
+					Built on a Legacy of Excellence
+				</h2>
+				<p className="text-sm row-start-2 col-start-2">
+					InMedina was founded by hospitality professionals who have
+					spent more than two decades welcoming guests to Morocco's
+					most beautiful accommodations. Our deep understanding of
+					what makes a space truly special, from the play of light
+					through traditional zellige tiles to the perfect courtyard
+					layout now guides our work in real estate and renovation. We
+					don't just sell properties. We help you discover homes that
+					capture the authentic spirit of Morocco while meeting modern
+					standards of comfort and quality.
+				</p>
+			</section>
+			<section className="bg-[#fdf4ea]">
+				<div className="m-auto max-w-7xl px-4 md:px-8 py-24">
+					{/* Section header */}
+					<div className="mb-20 max-w-2xl">
+						<p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+							Our Services
+						</p>
+						<h2 className="mt-4 text-3xl md:text-5xl font-serif">
+							From First Viewing to Finished Riad
+						</h2>
+						<p className="mt-6 text-base leading-relaxed text-muted-foreground">
+							We help you buy, restore, and enjoy properties that
+							capture the true spirit of Morocco, balancing
+							character, craftsmanship, and modern comfort.
 						</p>
 					</div>
-				</div>
-			</section>
-			<section className="py-20 flex flex-1 justify-center bg-secondary vision">
-				<div className="w-10/12 md:w-8/12">
-					<h2 className="text-3xl pb-4 vision">Our Services</h2>
-					<div className="grid">
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
-							<h3 className="font-semibold row-start-1 md:col-auto md:row-auto pb-2">Property Sales</h3>
-							<h3 className="font-semibold row-start-3 md:col-auto md:row-auto pb-2">Renovation & Restoration</h3>
-							<h3 className="font-semibold row-start-5 md:col-auto md:row-auto pb-2">Expert Consultation</h3>
-							<p className="pb-6 text-sm">
-								Whether you're seeking a riad in the heart of
-								the medina, a villa with Atlas Mountain views,
-								or a coastal retreat, we connect you with
-								exceptional Moroccan properties. Our portfolio
-								reflects our commitment to authenticity,
-								quality, and location.
-							</p>
-							<p className="pb-6 text-sm">
-								We transform properties while honoring their
-								architectural heritage. Our team combines
-								traditional Moroccan craftsmanship with
-								contemporary design sensibilities, creating
-								spaces that are both timeless and livable.
-							</p>
-							<p className="pb-6 text-sm">
-								Navigating Moroccan real estate requires local
-								knowledge and experience. We guide you through
-								every step—from property selection and legal
-								processes to design and renovation—ensuring a
-								smooth, transparent experience.
-							</p>
+
+					{/* Services list with breathable spacing */}
+					<div className="space-y-24 md:space-y-32">
+						{/* Row 1 */}
+						<div className="grid items-start gap-10 md:grid-cols-5 md:gap-12 border-t border-border pt-14">
+							<div className="relative h-48 md:h-64 overflow-hidden md:col-span-2">
+								<Image
+									src="/images/service-sales.jpg"
+									alt=""
+									fill
+									className="object-cover transition-transform duration-500 hover:scale-105"
+								/>
+							</div>
+
+							<div className="md:col-span-3 max-w-prose">
+								<p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
+									Property Sales
+								</p>
+								<h3 className="mt-4 text-2xl font-semibold">
+									Curated Moroccan Properties
+								</h3>
+								<p className="mt-5 text-base leading-relaxed text-muted-foreground">
+									Whether you're seeking a riad in the medina,
+									a villa with Atlas Mountain views, or a
+									coastal retreat, we connect you with
+									exceptional Moroccan properties, handpicked
+									for authenticity, beauty, and quality.
+								</p>
+								<ul className="mt-4 space-y-1 text-sm text-muted-foreground">
+									<li>Vetted listings</li>
+									<li>Local market insight</li>
+									<li>Guidance throughout purchase</li>
+								</ul>
+							</div>
+						</div>
+
+						{/* Row 2 */}
+						<div className="grid items-start gap-10 md:grid-cols-5 md:gap-12 border-t border-border pt-14">
+							<div className="md:order-2 relative h-48 md:h-64 overflow-hidden md:col-span-2">
+								<Image
+									src="/images/service-renovation.jpg"
+									alt=""
+									fill
+									className="object-cover transition-transform duration-500 hover:scale-105"
+								/>
+							</div>
+
+							<div className="md:order-1 md:col-span-3 max-w-prose">
+								<p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
+									Renovation & Restoration
+								</p>
+								<h3 className="mt-4 text-2xl font-semibold">
+									Honouring Architectural Heritage
+								</h3>
+								<p className="mt-5 text-base leading-relaxed text-muted-foreground">
+									We restore and transform properties using
+									traditional Moroccan craftsmanship—zellige,
+									tadelakt, carved cedar, and
+									ironwork, combined with modern design
+									sensibilities for comfort and longevity.
+								</p>
+								<ul className="mt-4 space-y-1 text-sm text-muted-foreground">
+									<li>Concept & design direction</li>
+									<li>Skilled local artisans</li>
+									<li>Project coordination</li>
+								</ul>
+							</div>
+						</div>
+
+						{/* Row 3 */}
+						<div className="grid items-start gap-10 md:grid-cols-5 md:gap-12 border-t border-border pt-14">
+							<div className="relative h-48 md:h-64 overflow-hidden md:col-span-2">
+								<Image
+									src="/images/service-consulting.jpg"
+									alt=""
+									fill
+									className="object-cover transition-transform duration-500 hover:scale-105"
+								/>
+							</div>
+
+							<div className="md:col-span-3 max-w-prose">
+								<p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
+									Expert Consultation
+								</p>
+								<h3 className="mt-4 text-2xl font-semibold">
+									Local Insight, Clear Guidance
+								</h3>
+								<p className="mt-5 text-base leading-relaxed text-muted-foreground">
+									Moroccan real estate can be complex. We help
+									you navigate everything: property selection,
+									legal frameworks, renovation logistics, and
+									investment potential, ensuring a smooth,
+									transparent experience.
+								</p>
+								<ul className="mt-4 space-y-1 text-sm text-muted-foreground">
+									<li>Property scouting</li>
+									<li>Legal & administrative context</li>
+									<li>Rental & investment guidance</li>
+								</ul>
+							</div>
 						</div>
 					</div>
 				</div>
 			</section>
-			<section className="py-20 flex flex-1 justify-center vision">
-				<div className="w-10/12 md:w-8/12">
-					<h2 className="text-3xl pb-4 vision">
-						Why Choose InMedina
-					</h2>
-					<div className="grid">
-						<div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2">
-							<h3 className="font-semibold col-start-1 row-start-1 md:col-auto md:row-auto">
-								25+ Years of Morocco Expertise
-							</h3>
-							<h3 className="font-semibold col-start-2 row-start-1 md:col-auto md:row-auto">
-								Local Knowledge, International Standards
-							</h3>
-							<h3 className="font-semibold col-start-1 row-start-3 md:col-auto md:row-auto">
-								End-to-End Service
-							</h3>
-							<h3 className="font-semibold col-start-2 row-start-3 md:col-auto md:row-auto">
-								Trusted Network
-							</h3>
-							<p className="text-sm">
-								Our founders' quarter-century in Moroccan
-								hospitality gives us unmatched insight into what
-								makes properties exceptional.
-							</p>
-							<p className="text-sm">
-								We understand both the traditional heart of
-								Morocco and the expectations of international
-								buyers.
-							</p>
-							<p className="text-sm">
-								From first viewing to final renovation, we're
-								with you throughout your property journey.
-							</p>
-							<p className="text-sm">
-								Our established relationships with craftsmen,
-								contractors, and legal professionals ensure
-								quality and reliability.
-							</p>
-						</div>
-					</div>
-				</div>
-			</section>
+			<ContactCta />
 		</>
 	);
 }

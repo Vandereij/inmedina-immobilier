@@ -4,537 +4,485 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import {
-	Bath,
-	BedDouble,
-	Home,
-	MapPin,
-	Search as SearchIcon,
-	SlidersHorizontal,
-	Loader2,
+  Bath,
+  BedDouble,
+  Home,
+  MapPin,
+  Search as SearchIcon,
+  SlidersHorizontal,
+  Loader2,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-/**
- * ENV REQUIREMENTS
- * - NEXT_PUBLIC_SUPABASE_URL
- * - NEXT_PUBLIC_SUPABASE_ANON_KEY
- */
 const supabase = createClient(
-	process.env.NEXT_PUBLIC_SUPABASE_URL!,
-	process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// Types matching your DB
 interface LocationRow {
-	id: string;
-	name: string;
+  id: string;
+  name: string;
 }
 
 interface PropertyRow {
-	id: string;
-	price: number;
-	bedrooms: number | null;
-	bathrooms: number | null;
-	location_id: string | null;
-	availability_type: "sale" | "rent";
-	property_type: "riad" | "terrain";
-	status: string; // e.g. "published", "draft", etc.
-	title: string; // assuming you have this since you ilike on it
+  id: string;
+  price: number;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  location_id: string | null;
+  availability_type: "sale" | "rent";
+  property_type: "riad" | "terrain";
+  status: string;
+  title: string;
 }
 
 interface SearchBarProps {
-	isAdmin?: boolean; // admins see all, users see only published
+  isAdmin?: boolean;
 }
 
 export default function SearchBar({ isAdmin = false }: SearchBarProps) {
-	// Filters
-	const [availabilityType, setAvailabilityType] = useState<
-		"rent" | "sale" | ""
-	>("");
-	const [propertyType, setPropertyType] = useState<"riad" | "terrain" | "">(
-		""
-	);
-	const [locationId, setLocationId] = useState<string | "">("");
-	const [bedrooms, setBedrooms] = useState<string>("any");
-	const [bathrooms, setBathrooms] = useState<string>("any");
-	const [query, setQuery] = useState<string>("");
+  // Filters
+  const [availabilityType, setAvailabilityType] = useState<
+    "rent" | "sale" | ""
+  >("");
+  const [propertyType, setPropertyType] = useState<"riad" | "terrain" | "">(
+    ""
+  );
+  const [locationId, setLocationId] = useState<string | "">("");
+  const [bedrooms, setBedrooms] = useState<string>("any");
+  const [bathrooms, setBathrooms] = useState<string>("any");
 
-	// Facets from DB (dynamic)
-	const [locations, setLocations] = useState<LocationRow[]>([]);
-	const [allProperties, setAllProperties] = useState<PropertyRow[]>([]);
+  // Facets
+  const [locations, setLocations] = useState<LocationRow[]>([]);
+  const [allProperties, setAllProperties] = useState<PropertyRow[]>([]);
+  const [bedroomOptions, setBedroomOptions] = useState<number[]>([]);
+  const [bathroomOptions, setBathroomOptions] = useState<number[]>([]);
 
-	const [bedroomOptions, setBedroomOptions] = useState<number[]>([]);
-	const [bathroomOptions, setBathroomOptions] = useState<number[]>([]);
+  // Price bounds
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(10000);
+  const [priceRangeDraft, setPriceRangeDraft] = useState<[number, number]>([
+    0, 10000,
+  ]);
+  const [priceRangeCommitted, setPriceRangeCommitted] = useState<
+    [number, number]
+  >([0, 10000]);
 
-	// Price slider bounds
-	const [minPrice, setMinPrice] = useState<number>(0);
-	const [maxPrice, setMaxPrice] = useState<number>(10000);
+  const [resultsCount, setResultsCount] = useState<number>(0);
+  const [loadingInitial, setLoadingInitial] = useState<boolean>(true);
 
-	// Draft (UI) vs committed (query) price ranges
-	const [priceRangeDraft, setPriceRangeDraft] = useState<[number, number]>([
-		0, 10000,
-	]);
-	const [priceRangeCommitted, setPriceRangeCommitted] = useState<
-		[number, number]
-	>([0, 10000]);
+  const prevBoundsRef = useRef<{ min: number | null; max: number | null }>({
+    min: null,
+    max: null,
+  });
 
-	// Results count
-	const [resultsCount, setResultsCount] = useState<number>(0);
+  // Locations
+  useEffect(() => {
+    const fetchLocations = async () => {
+      const { data: locs } = await supabase
+        .from("locations")
+        .select("id,name")
+        .order("name", { ascending: true });
 
-	// Loading states
-	const [loadingInitial, setLoadingInitial] = useState<boolean>(true);
+      if (locs) setLocations(locs as LocationRow[]);
+    };
 
-	// track previous bounds to preserve slider position
-	const prevBoundsRef = useRef<{ min: number | null; max: number | null }>({
-		min: null,
-		max: null,
-	});
+    fetchLocations();
+  }, []);
 
-	// Fetch locations once on mount
-	useEffect(() => {
-		const fetchLocations = async () => {
-			const { data: locs } = await supabase
-				.from("locations")
-				.select("id,name")
-				.order("name", { ascending: true });
+  // Properties
+  useEffect(() => {
+    const fetchProperties = async () => {
+      setLoadingInitial(true);
 
-			if (locs) setLocations(locs as LocationRow[]);
-		};
+      let q = supabase
+        .from("properties")
+        .select(
+          "id, price, bedrooms, bathrooms, location_id, availability_type, property_type, status, title"
+        );
 
-		fetchLocations();
-	}, []);
+      if (!isAdmin) {
+        q = q.eq("status", "published");
+      }
 
-	// Fetch all relevant properties once (admins: all, users: only published)
-	useEffect(() => {
-		const fetchProperties = async () => {
-			setLoadingInitial(true);
+      const { data, error } = await q;
+      if (!error && data) {
+        setAllProperties(data as PropertyRow[]);
+      }
 
-			let query = supabase
-				.from("properties")
-				.select(
-					"id, price, bedrooms, bathrooms, location_id, availability_type, property_type, status, title"
-				);
+      setLoadingInitial(false);
+    };
 
-			if (!isAdmin) {
-				query = query.eq("status", "published");
-			}
+    fetchProperties();
+  }, [isAdmin]);
 
-			const { data, error } = await query;
-			if (!error && data) {
-				setAllProperties(data as PropertyRow[]);
-			}
+  // Base filtered (no price, no keyword)
+  const baseFiltered = useMemo(() => {
+    return allProperties.filter((p) => {
+      if (availabilityType && p.availability_type !== availabilityType)
+        return false;
+      if (propertyType && p.property_type !== propertyType) return false;
+      if (locationId && p.location_id !== locationId) return false;
 
-			setLoadingInitial(false);
-		};
+      if (bedrooms !== "any") {
+        if (p.bedrooms === null || p.bedrooms !== Number(bedrooms)) return false;
+      }
 
-		fetchProperties();
-	}, [isAdmin]);
+      if (bathrooms !== "any") {
+        if (p.bathrooms === null || p.bathrooms !== Number(bathrooms))
+          return false;
+      }
 
-	// Base filtered properties – all filters EXCEPT price
-	const baseFiltered = useMemo(() => {
-		const q = query.trim().toLowerCase();
+      return true;
+    });
+  }, [
+    allProperties,
+    availabilityType,
+    propertyType,
+    locationId,
+    bedrooms,
+    bathrooms,
+  ]);
 
-		return allProperties.filter((p) => {
-			if (availabilityType && p.availability_type !== availabilityType)
-				return false;
-			if (propertyType && p.property_type !== propertyType) return false;
-			if (locationId && p.location_id !== locationId) return false;
+  // Derive facets + price
+  useEffect(() => {
+    if (!baseFiltered.length) {
+      setMinPrice(0);
+      setMaxPrice(0);
+      setBedroomOptions([]);
+      setBathroomOptions([]);
+      setPriceRangeDraft([0, 0]);
+      setPriceRangeCommitted([0, 0]);
+      prevBoundsRef.current = { min: 0, max: 0 };
+      setResultsCount(0);
+      return;
+    }
 
-			if (bedrooms !== "any") {
-				if (p.bedrooms === null || p.bedrooms !== Number(bedrooms))
-					return false;
-			}
+    const prices = baseFiltered
+      .map((r) => Number(r.price))
+      .filter((v) => !Number.isNaN(v));
 
-			if (bathrooms !== "any") {
-				if (p.bathrooms === null || p.bathrooms !== Number(bathrooms))
-					return false;
-			}
+    const newMin = Math.min(...prices);
+    const newMax = Math.max(...prices);
 
-			if (q) {
-				const title = p.title?.toLowerCase() ?? "";
-				if (!title.includes(q)) return false;
-			}
+    setMinPrice(newMin);
+    setMaxPrice(newMax);
 
-			return true;
-		});
-	}, [
-		allProperties,
-		availabilityType,
-		propertyType,
-		locationId,
-		bedrooms,
-		bathrooms,
-		query,
-	]);
+    const boundsChanged =
+      prevBoundsRef.current.min !== newMin ||
+      prevBoundsRef.current.max !== newMax;
 
-	// Derive facets + min/max price from baseFiltered
-	useEffect(() => {
-		if (!baseFiltered.length) {
-			setMinPrice(0);
-			setMaxPrice(0);
-			setBedroomOptions([]);
-			setBathroomOptions([]);
-			setPriceRangeDraft([0, 0]);
-			setPriceRangeCommitted([0, 0]);
-			prevBoundsRef.current = { min: 0, max: 0 };
-			setResultsCount(0);
-			return;
-		}
+    if (boundsChanged) {
+      setPriceRangeDraft([newMin, newMax]);
+      setPriceRangeCommitted([newMin, newMax]);
+    } else {
+      const clamp = (v: [number, number]) =>
+        [
+          Math.max(newMin, Math.min(v[0], newMax)),
+          Math.max(newMin, Math.min(v[1], newMax)),
+        ] as [number, number];
 
-		const prices = baseFiltered
-			.map((r) => Number(r.price))
-			.filter((v) => !Number.isNaN(v));
+      setPriceRangeDraft((prev) => clamp(prev));
+      setPriceRangeCommitted((prev) => clamp(prev));
+    }
 
-		const newMin = Math.min(...prices);
-		const newMax = Math.max(...prices);
+    prevBoundsRef.current = { min: newMin, max: newMax };
 
-		setMinPrice(newMin);
-		setMaxPrice(newMax);
+    const beds = Array.from(
+      new Set(
+        baseFiltered
+          .map((r) => r.bedrooms)
+          .filter((v): v is number => v !== null)
+      )
+    ).sort((a, b) => a - b);
 
-		const boundsChanged =
-			prevBoundsRef.current.min !== newMin ||
-			prevBoundsRef.current.max !== newMax;
+    const baths = Array.from(
+      new Set(
+        baseFiltered
+          .map((r) => r.bathrooms)
+          .filter((v): v is number => v !== null)
+      )
+    ).sort((a, b) => a - b);
 
-		if (boundsChanged) {
-			// reset range to full bounds if the universe changed
-			setPriceRangeDraft([newMin, newMax]);
-			setPriceRangeCommitted([newMin, newMax]);
-		} else {
-			const clamp = (v: [number, number]) =>
-				[
-					Math.max(newMin, Math.min(v[0], newMax)),
-					Math.max(newMin, Math.min(v[1], newMax)),
-				] as [number, number];
+    setBedroomOptions(beds);
+    setBathroomOptions(baths);
+  }, [baseFiltered]);
 
-			setPriceRangeDraft((prev) => clamp(prev));
-			setPriceRangeCommitted((prev) => clamp(prev));
-		}
+  // Apply price
+  useEffect(() => {
+    if (!baseFiltered.length) {
+      setResultsCount(0);
+      return;
+    }
 
-		prevBoundsRef.current = { min: newMin, max: newMax };
+    const [minP, maxP] = priceRangeCommitted;
+    const filteredWithPrice = baseFiltered.filter(
+      (p) => p.price >= minP && p.price <= maxP
+    );
 
-		const beds = Array.from(
-			new Set(
-				baseFiltered
-					.map((r) => r.bedrooms)
-					.filter((v): v is number => v !== null)
-			)
-		).sort((a, b) => a - b);
+    setResultsCount(filteredWithPrice.length);
+  }, [baseFiltered, priceRangeCommitted]);
 
-		const baths = Array.from(
-			new Set(
-				baseFiltered
-					.map((r) => r.bathrooms)
-					.filter((v): v is number => v !== null)
-			)
-		).sort((a, b) => a - b);
+  const spanFrom = priceRangeDraft[0];
+  const spanTo = priceRangeDraft[1];
 
-		setBedroomOptions(beds);
-		setBathroomOptions(baths);
-	}, [baseFiltered]);
+  const positionPercent = (value: number) => {
+    if (maxPrice === minPrice) return 0;
+    return ((value - minPrice) / (maxPrice - minPrice)) * 100;
+  };
 
-	// Apply price to get final count (all in memory)
-	useEffect(() => {
-		if (!baseFiltered.length) {
-			setResultsCount(0);
-			return;
-		}
+  const onSearch = () => {
+    const params = new URLSearchParams({
+      availability_type: availabilityType || "",
+      property_type: propertyType || "",
+      locationId: locationId || "",
+      bedrooms,
+      bathrooms,
+      minPrice: String(priceRangeCommitted[0]),
+      maxPrice: String(priceRangeCommitted[1]),
+    });
+    window.location.href = `/properties?${params.toString()}`;
+  };
 
-		const [minP, maxP] = priceRangeCommitted;
-		const filteredWithPrice = baseFiltered.filter(
-			(p) => p.price >= minP && p.price <= maxP
-		);
+  const formatMoney = (v: number) => v.toLocaleString();
 
-		setResultsCount(filteredWithPrice.length);
-	}, [baseFiltered, priceRangeCommitted]);
+  return (
+    <section className="bg-[#fdf4ea]">
+      <div className="mx-auto max-w-7xl px-4 py-6 md:px-8">
+        <div className="rounded-3xl border border-[#f1d9c3] bg-white/80 p-5 shadow-sm backdrop-blur md:p-6">
+          {/* Header row (more compact) */}
+          <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="text-[10px] font-semibold tracking-[0.24em] text-neutral-500 uppercase">
+                Search
+              </div>
+              <h2 className="mt-1 font-serif text-xl text-[#1e1e1e] md:text-2xl">
+                Find a home in Morocco
+              </h2>
+            </div>
+            <div className="flex items-center gap-2 text-right">
+              {loadingInitial ? (
+                <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />
+              ) : (
+                <>
+                  <div className="text-lg font-semibold tracking-tight text-[#1e1e1e]">
+                    {resultsCount.toLocaleString()}
+                  </div>
+                  <div className="text-[11px] text-neutral-500">results</div>
+                </>
+              )}
+            </div>
+          </div>
 
-	const spanFrom = useMemo(() => priceRangeDraft[0], [priceRangeDraft]);
-	const spanTo = useMemo(() => priceRangeDraft[1], [priceRangeDraft]);
+          {/* Availability tabs */}
+          <Tabs
+            value={availabilityType || "all"}
+            onValueChange={(v) =>
+              setAvailabilityType(v === "all" ? "" : (v as "rent" | "sale"))
+            }
+          >
+            <TabsList className="mb-4 grid grid-cols-3 rounded-full bg-[#f8f3ee] p-1">
+              {[
+                { value: "all", label: "All" },
+                { value: "rent", label: "Rent" },
+                { value: "sale", label: "Sale" },
+              ].map((opt) => (
+                <TabsTrigger
+                  key={opt.value}
+                  value={opt.value}
+                  className="rounded-full px-2 py-1.5 text-xs font-medium text-neutral-700 data-[state=active]:bg-white data-[state=active]:text-[#1e1e1e] data-[state=active]:shadow-sm"
+                >
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Home className="h-4 w-4" />
+                    <span>{opt.label}</span>
+                  </div>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
 
-	const positionPercent = (value: number) => {
-		if (maxPrice === minPrice) return 0;
-		return ((value - minPrice) / (maxPrice - minPrice)) * 100;
-	};
+          {/* Filters */}
+          <div className="space-y-4">
+            {/* Top row: type / location / bedrooms / bathrooms */}
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-6">
+              {/* Property Type */}
+              <div className="space-y-1 md:justify-self-start place-items-center">
+                <Label className="text-[10px] uppercase tracking-[0.18em] text-neutral-600">
+                  Property type
+                </Label>
+                <Select
+                  value={propertyType || "__all__"}
+                  onValueChange={(v) =>
+                    setPropertyType(v === "__all__" ? "" : (v as "riad" | "terrain"))
+                  }
+                >
+                  <SelectTrigger className="h-10 justify-between rounded-full border-neutral-200 bg-white/80 px-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Home className="h-4 w-4 text-neutral-500" />
+                      <SelectValue placeholder="Any" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Any</SelectItem>
+                    <SelectItem value="riad">Riads</SelectItem>
+                    <SelectItem value="terrain">Terrains</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-	const onSearch = () => {
-		const params = new URLSearchParams({
-			availability_type: availabilityType || "",
-			property_type: propertyType || "",
-			locationId: locationId || "",
-			bedrooms,
-			bathrooms,
-			minPrice: String(priceRangeCommitted[0]),
-			maxPrice: String(priceRangeCommitted[1]),
-			q: query,
-		});
-		window.location.href = `/properties?${params.toString()}`;
-	};
+              {/* Location */}
+              <div className="space-y-1 md:justify-self-start place-items-center">
+                <Label className="text-[10px] uppercase tracking-[0.18em] text-neutral-600">
+                  Location
+                </Label>
+                <Select
+                  value={locationId || "__all__"}
+                  onValueChange={(v) => setLocationId(v === "__all__" ? "" : v)}
+                >
+                  <SelectTrigger className="h-10 justify-between rounded-full border-neutral-200 bg-white/80 px-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-neutral-500" />
+                      <SelectValue placeholder="Any" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Any</SelectItem>
+                    {locations.map((loc) => (
+                      <SelectItem key={loc.id} value={loc.id}>
+                        {loc.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-	const formatMoney = (v: number) => v.toLocaleString();
+              {/* Bedrooms */}
+              <div className="space-y-1 md:justify-self-start place-items-center">
+                <Label className="text-[10px] uppercase tracking-[0.18em] text-neutral-600">
+                  Bedrooms
+                </Label>
+                <Select value={bedrooms} onValueChange={setBedrooms}>
+                  <SelectTrigger className="h-10 justify-between rounded-full border-neutral-200 bg:white/80 px-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <BedDouble className="h-4 w-4 text-neutral-500" />
+                      <SelectValue placeholder="Any" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any</SelectItem>
+                    {bedroomOptions.map((n) => (
+                      <SelectItem key={n} value={String(n)}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-	return (
-		<div className="max-w-5xl">
-			<Tabs
-				value={availabilityType || "all"}
-				onValueChange={(v) =>
-					setAvailabilityType(
-						v === "all" ? "" : (v as "rent" | "sale")
-					)
-				}
-				className="max-w-5xl mt-16"
-			>
-				<TabsList className="grid grid-cols-3 rounded-t-2xl rounded-b-none p-0">
-					<TabsTrigger
-						value="all"
-						className="flex items-center gap-2 rounded-t-2xl"
-					>
-						<Home className="h-4 w-4" />
-						<span>All</span>
-					</TabsTrigger>
-					<TabsTrigger
-						value="rent"
-						className="flex items-center gap-2 rounded-t-2xl"
-					>
-						<Home className="h-4 w-4" />
-						<span>Rent</span>
-					</TabsTrigger>
-					<TabsTrigger
-						value="sale"
-						className="flex items-center gap-2 rounded-t-2xl"
-					>
-						<Home className="h-4 w-4" />
-						<span>Sale</span>
-					</TabsTrigger>
-				</TabsList>
-			</Tabs>
-			<div className="mx-auto mb-16 rounded-2xl rounded-tl-none border bg-white p-6 shadow-sm">
-				{/* Top Row */}
-				<div className="grid grid-cols-1 items-end gap-4 md:grid-cols-5">
-					{/* Property Type */}
-					<div className="space-y-2 justify-items-center">
-						<Label className="text-sm">Property type</Label>
-						<Select
-							value={propertyType || "__all__"}
-							onValueChange={(v) =>
-								setPropertyType(
-									v === "__all__"
-										? ""
-										: (v as "riad" | "terrain")
-								)
-							}
-						>
-							<SelectTrigger className="justify-between rounded-2xl max-md:w-xs">
-								<div className="flex items-center gap-2">
-									<Home className="h-4 w-4" />{" "}
-									<SelectValue placeholder="Type" />
-								</div>
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="riad">Riads</SelectItem>
-								<SelectItem value="terrain">
-									Terrains
-								</SelectItem>
-								<SelectItem value="__all__">All</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
+              {/* Bathrooms */}
+              <div className="space-y-1 md:justify-self-start place-items-center">
+                <Label className="text-[10px] uppercase tracking-[0.18em] text-neutral-600">
+                  Bathrooms
+                </Label>
+                <Select value={bathrooms} onValueChange={setBathrooms}>
+                  <SelectTrigger className="h-10 justify-between rounded-full border-neutral-200 bg:white/80 px-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Bath className="h-4 w-4 text-neutral-500" />
+                      <SelectValue placeholder="Any" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any</SelectItem>
+                    {bathroomOptions.map((n) => (
+                      <SelectItem key={n} value={String(n)}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-					{/* Location */}
-					<div className="space-y-2 justify-items-center">
-						<Label className="text-sm">Location</Label>
-						<Select
-							value={locationId || "__all__"}
-							onValueChange={(v) =>
-								setLocationId(v === "__all__" ? "" : v)
-							}
-						>
-							<SelectTrigger className="mt-2 justify-between rounded-2xl max-md:w-xs">
-								<div className="flex items-center gap-2">
-									<MapPin className="h-4 w-4" />{" "}
-									<SelectValue placeholder="Select a location" />
-								</div>
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="__all__">All</SelectItem>
-								{locations.map((loc) => (
-									<SelectItem key={loc.id} value={loc.id}>
-										{loc.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
+            {/* Price + button */}
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,2.5fr)_auto] md:items-end">
+              {/* Price slider */}
+              <div className="space-y-1 md:px-1">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 font-medium text-neutral-700">
+                    <SlidersHorizontal className="h-4 w-4" />
+                    Price range
+                  </div>
+                  <div className="text-[11px] text-neutral-500">
+                    {minPrice === maxPrice
+                      ? "No range"
+                      : `${formatMoney(minPrice)} – ${formatMoney(maxPrice)}`}
+                  </div>
+                </div>
 
-					{/* Bedrooms */}
-					<div className="space-y-2 justify-items-center">
-						<Label className="text-sm">Bedrooms</Label>
-						<Select
-							value={bedrooms}
-							onValueChange={(v) => setBedrooms(v)}
-						>
-							<SelectTrigger className="justify-between rounded-2xl max-md:w-xs">
-								<div className="flex items-center gap-2">
-									<BedDouble className="h-4 w-4" />{" "}
-									<SelectValue placeholder="Any" />
-								</div>
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="any">Any</SelectItem>
-								{bedroomOptions.map((n) => (
-									<SelectItem key={n} value={String(n)}>
-										{n}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
+                <div className="relative pt-4">
+                  {/* Floating labels */}
+                  <div className="pointer-events-none absolute left-0 right-0 top-0">
+                    <div
+                      className="absolute -translate-x-1/2 -translate-y-1/3 rounded-full bg-[#c98a5a] px-2 py-0.5 text-[11px] font-medium text-white shadow-sm"
+                      style={{ left: `${positionPercent(spanFrom)}%` }}
+                    >
+                      {formatMoney(spanFrom)}
+                    </div>
+                    <div
+                      className="absolute -translate-x-1/2 -translate-y-1/3 rounded-full bg-[#c98a5a] px-2 py-0.5 text-[11px] font-medium text-white shadow-sm"
+                      style={{ left: `${positionPercent(spanTo)}%` }}
+                    >
+                      {formatMoney(spanTo)}
+                    </div>
+                  </div>
 
-					{/* Bathrooms */}
-					<div className="space-y-2 justify-items-center">
-						<Label className="text-sm">Bathrooms</Label>
-						<Select
-							value={bathrooms}
-							onValueChange={(v) => setBathrooms(v)}
-						>
-							<SelectTrigger className="justify-between rounded-2xl max-md:w-xs">
-								<div className="flex items-center gap-2">
-									<Bath className="h-4 w-4" />{" "}
-									<SelectValue placeholder="Any" />
-								</div>
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="any">Any</SelectItem>
-								{bathroomOptions.map((n) => (
-									<SelectItem key={n} value={String(n)}>
-										{n}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
+                  <Slider
+                    value={priceRangeDraft}
+                    min={minPrice}
+                    max={maxPrice}
+                    step={Math.max(
+                      1,
+                      Math.round((maxPrice - minPrice) / 200)
+                    )}
+                    onValueChange={(v) =>
+                      setPriceRangeDraft([v[0], v[1]] as [number, number])
+                    }
+                    onValueCommit={(v) =>
+                      setPriceRangeCommitted([v[0], v[1]] as [number, number])
+                    }
+                    className="mx-1"
+                  />
 
-					{/* Results count (desktop) */}
-					<div className="hidden items-center justify-end md:flex border-l-2">
-						<div className="text-right">
-							{loadingInitial ? (
-								<div className="flex items-center justify-end">
-									<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-								</div>
-							) : (
-								<div className="text-2xl font-semibold tracking-tight">
-									{resultsCount.toLocaleString()}
-								</div>
-							)}
-							<div className="text-xs text-muted-foreground">
-								Results
-							</div>
-						</div>
-					</div>
-				</div>
+                  <div className="mt-1 flex justify-between text-[11px] text-neutral-500">
+                    <span>{formatMoney(minPrice)}</span>
+                    <span>{formatMoney(maxPrice)}</span>
+                  </div>
+                </div>
+              </div>
 
-				{/* Price Range Slider + Search button */}
-				<div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-5 md:items-center">
-					<div className="md:col-span-4">
-						<div className="mb-2 flex items-center justify-between">
-							<div className="flex items-center gap-2 text-sm font-medium">
-								<SlidersHorizontal className="h-4 w-4" /> Price
-								range
-							</div>
-							<div className="text-xs text-muted-foreground">
-								{minPrice === maxPrice
-									? "No range"
-									: `${formatMoney(minPrice)} – ${formatMoney(
-											maxPrice
-									  )}`}
-							</div>
-						</div>
-
-						<div className="relative px-2 pt-6">
-							<div
-								className="pointer-events-none absolute top-0 left-0 right-0"
-								aria-hidden
-							>
-								<div
-									className="absolute -translate-x-1/2 -translate-y-1/3 rounded-2xl bg-primary px-2 py-1 text-xs font-medium text-primary-foreground shadow"
-									style={{
-										left: `${positionPercent(spanFrom)}%`,
-									}}
-								>
-									{formatMoney(spanFrom)}
-								</div>
-								<div
-									className="absolute -translate-x-1/2 -translate-y-1/3 rounded-2xl bg-primary px-2 py-1 text-xs font-medium text-primary-foreground shadow"
-									style={{
-										left: `${positionPercent(spanTo)}%`,
-									}}
-								>
-									{formatMoney(spanTo)}
-								</div>
-							</div>
-
-							<Slider
-								value={priceRangeDraft}
-								min={minPrice}
-								max={maxPrice}
-								step={Math.max(
-									1,
-									Math.round((maxPrice - minPrice) / 200)
-								)}
-								onValueChange={(v) =>
-									setPriceRangeDraft([v[0], v[1]] as [
-										number,
-										number
-									])
-								}
-								onValueCommit={(v) =>
-									setPriceRangeCommitted([v[0], v[1]] as [
-										number,
-										number
-									])
-								}
-								className="mx-1"
-							/>
-
-							<div className="mt-2 flex justify-between text-xs text-muted-foreground">
-								<span>{formatMoney(minPrice)}</span>
-								<span>{formatMoney(maxPrice)}</span>
-							</div>
-						</div>
-					</div>
-
-					<div className="md:col-span-1 md:pt-7">
-						<Button onClick={onSearch} className="h-11 w-full rounded-full">
-							<SearchIcon className="mr-2 h-4 w-4" /> Search
-						</Button>
-					</div>
-
-					{/* Mobile results count */}
-					<div className="md:hidden">
-						<div className="flex items-center gap-2">
-							{loadingInitial ? (
-								<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-							) : (
-								<div>
-									<div className="text-xl font-semibold leading-none">
-										{resultsCount.toLocaleString()}
-									</div>
-									<div className="text-xs text-muted-foreground">
-										Results
-									</div>
-								</div>
-							)}
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+              {/* Search CTA */}
+              <div className="md:pb-1">
+                <Button
+                  onClick={onSearch}
+                  className="h-10 w-full rounded-full bg-[#c98a5a] text-white hover:bg-[#b37750]"
+                >
+                  <SearchIcon className="mr-2 h-4 w-4" />
+                  Search
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

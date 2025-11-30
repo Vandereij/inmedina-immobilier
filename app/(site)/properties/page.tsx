@@ -1,27 +1,15 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
-import {
-	Card,
-	CardHeader,
-	CardContent,
-	CardFooter,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	LucideBath,
-	LucideBedDouble,
-	LucideMapPin,
-	LucideRulerDimensionLine,
-} from "lucide-react";
 import { Metadata } from "next";
+import PropertyCardList from "@/components/property-card-list";
 
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
 	return {
-		title: '',
-		description: '',
+		title: "",
+		description: "",
 	};
 }
 
@@ -30,69 +18,110 @@ export default async function PropertiesPage({
 }: {
 	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-	const params = await searchParams;
+	const rawParams = await searchParams;
+
+	// Helper to always get a single string
+	const getParam = (value: string | string[] | undefined) =>
+		Array.isArray(value) ? value[0] : value;
+
+	const params = {
+		page: getParam(rawParams.page),
+		availability_type: getParam(rawParams.availability_type),
+		featured: getParam(rawParams.featured),
+		locationId: getParam(rawParams.locationId),
+		property_type: getParam(rawParams.property_type),
+		minPrice: getParam(rawParams.minPrice || rawParams.min_price),
+		maxPrice: getParam(rawParams.maxPrice || rawParams.max_price),
+		bedrooms: getParam(rawParams.bedrooms),
+		bathrooms: getParam(rawParams.bathrooms),
+		q: getParam(rawParams.q),
+	};
+
 	const page = Number(params.page || 1);
 	const pageSize = 12;
 	const from = (page - 1) * pageSize;
 	const to = from + pageSize - 1;
 
 	const supabase = await createClient();
+
 	let query = supabase
 		.from("properties")
 		.select(
-			"id,title,slug,price,currency,bedrooms,bathrooms,cover_image_url,property_type,address_line1,area_sqm,availability_type,locations(name)",
+			`
+      id,
+      title,
+      slug,
+      price,
+      currency,
+      bedrooms,
+      bathrooms,
+      cover_image_url,
+      property_type,
+      address_line1,
+      area_sqm,
+      availability_type,
+      locations ( name )
+    `,
 			{ count: "exact" }
 		)
 		.eq("status", "published")
 		.order("created_at", { ascending: false })
 		.range(from, to);
 
-	// Filter by availability type (e.g., sale, rent)
+	// 🔹 Availability type (sale, rent...)
 	if (params.availability_type) {
 		query = query.eq("availability_type", params.availability_type);
 	}
 
-	// Filter by location ID (URL param is 'locationId', DB column is 'location_id')
+	// 🔹 Featured (URL gives "true"/"false" as string)
+	if (params.featured === "true") {
+		query = query.eq("featured", true);
+	} else if (params.featured === "false") {
+		query = query.eq("featured", false);
+	}
+
+	// 🔹 Location (ID)
 	if (params.locationId) {
 		query = query.eq("location_id", params.locationId);
 	}
 
-	// Filter by property type (e.g., house, apartment, villa)
+	// 🔹 Property type
 	if (params.property_type) {
 		query = query.eq("property_type", params.property_type);
 	}
 
-	// Filter by price range (between min and max)
-	// Support both camelCase and snake_case
-	const minPrice = params.minPrice || params.min_price;
-	const maxPrice = params.maxPrice || params.max_price;
-
-	if (minPrice && maxPrice) {
+	// 🔹 Price range
+	if (params.minPrice && params.maxPrice) {
 		query = query
-			.gte("price", Number(minPrice))
-			.lte("price", Number(maxPrice));
-	} else if (minPrice) {
-		query = query.gte("price", Number(minPrice));
-	} else if (maxPrice) {
-		query = query.lte("price", Number(maxPrice));
+			.gte("price", Number(params.minPrice))
+			.lte("price", Number(params.maxPrice));
+	} else if (params.minPrice) {
+		query = query.gte("price", Number(params.minPrice));
+	} else if (params.maxPrice) {
+		query = query.lte("price", Number(params.maxPrice));
 	}
 
-	// Filter by number of bedrooms
+	// 🔹 Bedrooms
 	if (params.bedrooms && params.bedrooms !== "any") {
 		query = query.eq("bedrooms", Number(params.bedrooms));
 	}
 
-	// Filter by number of bathrooms
+	// 🔹 Bathrooms
 	if (params.bathrooms && params.bathrooms !== "any") {
 		query = query.eq("bathrooms", Number(params.bathrooms));
 	}
 
-	// Search in amenities
+	// 🔹 Amenities search
 	if (params.q) {
 		query = query.contains("amenities", [params.q]);
 	}
 
-	const { data, count } = await query;
+	const { data, count, error } = await query;
+
+	if (error) {
+		console.error("Error loading properties:", error);
+	}
+
 	const totalPages = Math.max(1, Math.ceil((count || 0) / pageSize));
 
 	return (
@@ -125,80 +154,12 @@ export default async function PropertiesPage({
 
 			{/* 🏠 Properties Grid */}
 			<div className="flex justify-center">
-				<div className="w-8/12 pb-16">
+				<div className="m-auto max-w-7xl px-4 md:px-8 pb-16">
 					<h2 className="text-xl md:text-2xl mb-10">
 						Available Properties {count !== null && `(${count})`}
 					</h2>
-					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-						{data?.map((p: any) => (
-							<Link key={p.id} href={`/properties/${p.slug}`}>
-								<Card className="shadow-none border-none overflow-hidden rounded-none gap-4">
-									<div className="relative">
-										<img
-											src={
-												p.cover_image_url ||
-												"https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
-											}
-											alt={p.title}
-											className="w-full h-60 object-cover"
-										/>
-										<div className="absolute top-4 left-4">
-											{/* Location badge */}
-											<Badge
-												variant="secondary"
-												className="bg-[oklch(0.7_0_0/.50)] text-background uppercase text-xs rounded-md"
-											>
-												{p.locations?.name || "Unknown"}
-											</Badge>
-										</div>
-										{/* Price badge */}
-										<div className="absolute bottom-4 left-4">
-										<Badge
-											variant="default"
-											className="uppercase text-lg font-medium text-accent-foreground rounded-lg"
-										>
-											{p.currency}{" "}
-											{Number(p.price).toLocaleString()}
-										</Badge>
-										</div>
-									</div>
-									<CardHeader>
-										<h3 className="font-semibold">
-											{p.title}
-										</h3>
-									</CardHeader>
-									<CardContent>
-										<div className="text-sm text-muted-foreground grid grid-cols-5">
-											{p.bedrooms && (
-												<div className="flex items-center gap-1">
-													<LucideBedDouble className="size-4" />
-													{p.bedrooms}
-												</div>
-											)}
-											{p.bathrooms && (
-												<div className="flex items-center gap-1">
-													<LucideBath className="size-4" />
-													{p.bathrooms}
-												</div>
-											)}
-											{p.area_sqm && (
-												<div className="flex items-center gap-1 col-span-2">
-													<LucideRulerDimensionLine className="size-4" />
-													{p.area_sqm + "m\u00B2"}
-												</div>
-											)}
-										</div>
-									</CardContent>
-									<CardFooter className="flex place-content-between items-center">
-										<div className="text-sm text-muted-foreground flex items-center">
-											<LucideMapPin className="size-4 mr-1" />
-											{p.address_line1}
-										</div>
-									</CardFooter>
-								</Card>
-							</Link>
-						))}
-					</div>
+
+					<PropertyCardList parentData={data ?? []} />
 
 					{/* No Results Message */}
 					{data?.length === 0 && (
@@ -216,18 +177,22 @@ export default async function PropertiesPage({
 					{totalPages > 1 && (
 						<div className="flex gap-2 mt-6 justify-center">
 							{Array.from({ length: totalPages }).map((_, i) => {
-								// Preserve existing filters in pagination links
 								const paginationParams = new URLSearchParams();
-								Object.entries(params).forEach(
+
+								Object.entries(rawParams).forEach(
 									([key, value]) => {
 										if (key !== "page" && value) {
+											const v = Array.isArray(value)
+												? value[0]
+												: value;
 											paginationParams.set(
 												key,
-												String(value)
+												String(v)
 											);
 										}
 									}
 								);
+
 								paginationParams.set("page", String(i + 1));
 
 								return (

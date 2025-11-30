@@ -1,24 +1,37 @@
+// app/layout.tsx
 import Header from "@/components/header";
+import Footer from "@/components/footer";
 import "./globals.css";
+import { createSupabaseServerClient } from "@/lib/auth"; // from your earlier code
 
-export default function RootLayout({
-	children
+export default async function RootLayout({
+  children,
 }: {
-	children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-	return (
-		<html lang="en">
-			<body className="min-h-screen flex flex-col">
-				<main className="flex flex-1">
-					<section className="w-full">
-						<Header />
-						{children}
-					</section>
-				</main>
-				<footer className="p-4 border-t text-sm text-center">
-					© {new Date().getFullYear()} RealEstate
-				</footer>
-			</body>
-		</html>
-	);
+  const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let isAdmin = false;
+
+  if (user) {
+    const { data } = await supabase.rpc("is_admin");
+    isAdmin = !!data;
+  }
+
+  return (
+    <html lang="en">
+      <body className="min-h-screen bg-background text-[#1e1e1e]">
+        <main>
+          {/* pass admin + user info down */}
+          <Header isAdmin={isAdmin} user={user} />
+          <section>{children}</section>
+          <Footer />
+        </main>
+      </body>
+    </html>
+  );
 }

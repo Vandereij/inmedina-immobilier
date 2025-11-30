@@ -5,112 +5,75 @@ import { useState } from "react";
 import SocialLinks from "./social-links";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import nmlogo from "../public/nmlogo.png";
-import nmlogodark from "../public/nmlogodark.png";
-import nmlogosvg from "../public/nmlogo.svg"
+import nmlogosvg from "../public/nmlogo.svg";
 import { Menu, X } from "lucide-react";
+import { getInitialsFromEmail } from "@/lib/utils";
+import { UserAvatar } from "./user-avatar";
 
-export default function Header() {
+type HeaderProps = {
+	isAdmin: boolean;
+	user: { id: string; email?: string | null } | null;
+};
+
+export default function Header({ isAdmin, user }: HeaderProps) {
 	const pathname = usePathname();
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const isAuthPage = pathname?.startsWith("/auth");
 	const isHomePage = pathname === "/";
-	const headerPosition = isHomePage ? "absolute left-0 right-0" : "";
-	const linkColor = isHomePage ? "text-secondary" : "text-secondary-foreground";
-	const iconColor = isHomePage ? "fill-secondary" : "fill-secondary-foreground";
-	const logoImage = isHomePage ? nmlogodark : nmlogo;
 
 	const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 	const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
 	return (
 		<>
-			<header
-				className={`pt-4 pb-6 flex items-center justify-center ${headerPosition} z-50`}
-			>
-				<div className="w-10/12">
-					<SocialLinks isHomePage={isHomePage} />
-					<div className="flex">
-						<nav className="flex w-full items-center justify-between">
-							<Link href="/" className="font-semibold text-lg">
-								<Image
-									alt="InMedina Logo"
-									src={nmlogosvg}
-									width={40}
-									height={40}
-								/>
-							</Link>
+			<header className="bg-background/90 backdrop-blur text-sm">
+				<SocialLinks isHomePage={isHomePage} />
+				<nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-8">
+					<Link className="flex items-center gap-3" href="/">
+						<Image
+							className="grid h-8 w-8 p-1.5 place-items-center bg-foreground/90 rounded-xl"
+							alt="InMedina Logo"
+							src={nmlogosvg}
+							width={40}
+							height={40}
+						/>
+						<div className="font-serif text-lg">InMedina</div>
+					</Link>
 
-							{/* Desktop Navigation */}
-							<div className="hidden lg:flex gap-4 transition-all">
+					<div>
+						{/* Desktop Navigation */}
+						<div className="hidden gap-6 text-sm text-neutral-700 md:flex">
+							{[
+								{ name: "Home", url: "/" },
+								{ name: "Properties", url: "/properties" },
+								{ name: "Services", url: "/services" },
+								{ name: "Who we are", url: "/about-inmedina" },
+								{ name: "Contact us", url: "/contact" },
+							].map((item, index) => (
 								<Button
-									className={`${linkColor}`}
-									size="sm"
-									variant="link"
+									key={index}
+									variant="linkHeader"
+									size="header"
 									asChild
 								>
-									<Link
-										href="/"
-										className="hover:underline font-medium"
-									>
-										Home
-									</Link>
+									<Link href={item.url}>{item.name}</Link>
 								</Button>
+							))}
 
-								<Button
-									className={`${linkColor}`}
-									size="sm"
-									variant="link"
-									asChild
-								>
-									<Link
-										href="/properties"
-										className="hover:underline font-medium"
-									>
-										Properties
-									</Link>
-								</Button>
-
-								<Button
-									className={`${linkColor}`}
-									size="sm"
-									variant="link"
-									asChild
-								>
-									<Link
-										href="/about-inmedina"
-										className="hover:underline"
-									>
-										Who We Are
-									</Link>
-								</Button>
-
-								<Button
-									className={`rounded-2xl`}
-									size="sm"
-									variant="secondary"
-									asChild
-								>
-									<Link href="/contact">Contact Us</Link>
-								</Button>
-
-								<Button
-									className={`${linkColor}`}
-									size="sm"
-									variant="link"
-									asChild
-								>
-									<Link
-										href="/admin"
-										className="hover:underline"
-									>
-										Admin
-									</Link>
-								</Button>
-							</div>
-
-							{/* Desktop Auth Button */}
-							{!isAuthPage && (
+							{user ? (
+								<>
+									{isAdmin && (
+										<Button
+											variant="linkHeader"
+											size="header"
+											asChild
+										>
+											<Link href={"/admin"}>Admin</Link>
+										</Button>
+									)}
+									<UserAvatar email={user.email} />
+								</>
+							) : (
 								<Button
 									size="lg"
 									variant="default"
@@ -120,24 +83,24 @@ export default function Header() {
 									<Link href="/auth">Login / Sign up</Link>
 								</Button>
 							)}
+						</div>
 
-							{/* Mobile Menu Button */}
-							<Button
-								variant={isHomePage ? "default" : "ghost"}
-								size="icon"
-								className="lg:hidden"
-								onClick={toggleMobileMenu}
-								aria-label="Toggle menu"
-							>
-								{isMobileMenuOpen ? (
-									<X className="h-6 w-6" />
-								) : (
-									<Menu className="h-6 w-6" />
-								)}
-							</Button>
-						</nav>
+						{/* Mobile Menu Button */}
+						<Button
+							variant={isHomePage ? "default" : "ghost"}
+							size="icon"
+							className="lg:hidden"
+							onClick={toggleMobileMenu}
+							aria-label="Toggle menu"
+						>
+							{isMobileMenuOpen ? (
+								<X className="h-6 w-6" />
+							) : (
+								<Menu className="h-6 w-6" />
+							)}
+						</Button>
 					</div>
-				</div>
+				</nav>
 			</header>
 
 			{/* Mobile Menu Overlay */}
@@ -196,9 +159,7 @@ export default function Header() {
 						asChild
 						onClick={closeMobileMenu}
 					>
-						<Link href="/about-inmedina">
-							Who We Are
-						</Link>
+						<Link href="/about-inmedina">Who We Are</Link>
 					</Button>
 
 					<Button
@@ -218,9 +179,7 @@ export default function Header() {
 						asChild
 						onClick={closeMobileMenu}
 					>
-						<Link href="/admin">
-							Admin
-						</Link>
+						<Link href="/admin">Admin</Link>
 					</Button>
 
 					{!isAuthPage && (

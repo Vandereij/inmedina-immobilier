@@ -15,9 +15,8 @@
 
 	--radius: 0.125rem; /* 2px - minimal rounded corners */
 
-	/* Scandinavian Light Mode Colors */
-	--background: oklch(0.99 0 0); /* #fafafa - off-white */
-	--foreground: oklch(0.27 0 0); /* #2e2e2e - charcoal */
+	--background: oklch(0.9666 0.0086 67.72);
+	--foreground: oklch(0.235 0 0);
 
 	--card: oklch(1 0 0); /* white */
 	--card-foreground: oklch(0.27 0 0); /* #2e2e2e */

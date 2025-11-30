@@ -23,3 +23,25 @@ export function deepMergeAmenities(savedData: Partial<Amenities>): Amenities {
 
   return merged;
 }
+
+export function getInitialsFromEmail(email: string | null | undefined): string {
+  if (!email || !email.includes("@")) return "";
+
+  const localPart = email.split("@")[0];
+
+  // Replace separators with spaces for splitting
+  const normalized = localPart.replace(/[-_.]+/g, " ");
+
+  const parts = normalized.split(" ").filter(Boolean);
+
+  // If the user has multiple parts (john doe → JD)
+  if (parts.length >= 2) {
+    return (
+      parts[0][0].toUpperCase() +
+      parts[1][0].toUpperCase()
+    );
+  }
+
+  // Single word username: take first letter only
+  return localPart[0].toUpperCase();
+}

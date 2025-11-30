@@ -8,9 +8,9 @@ type SocialProps = {
 }
 
 export default function SocialLinks(linksProps: SocialProps) {
-	const color = linksProps.isHomePage ? "fill-secondary" : "fill-secondary-foreground";
+	const color = linksProps.isHomePage ? "fill-foreground/50 hover:fill-foreground" : "fill-foreground/50 hover:fill-foreground";
 	return (
-		<nav className="w-full p-4 flex gap-8 text-sm items-center">
+		<nav className="mx-auto flex max-w-7xl px-4 pt-4 md:px-8 gap-8 text-sm items-center">
 			<Link className="w-3" href={"https://inmedina.com"}>
 				<CIcon className={`${color}`} icon={cibFacebookF} />
 			</Link>
