@@ -120,14 +120,14 @@ export default function AboutInmedina() {
 							<div className="relative h-64 w-full overflow-hidden rounded-2xl">
 								<Image
 									src="/images/about-stefano.jpg"
-									alt="Stefano, co-founder of InMedina."
+									alt="Stefano – founder of InMedina."
 									fill
 									className="object-cover"
 								/>
 							</div>
 							<div>
 								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-									Stefano – Co-founder, hospitality &amp; strategy
+									Stefano – Founder, Marketing &amp; Digital Strategy
 								</p>
 								<h3 className="mt-3 text-xl font-semibold">
 									Shaped by repeated journeys through Morocco
@@ -156,14 +156,14 @@ export default function AboutInmedina() {
 							<div className="relative h-64 w-full overflow-hidden rounded-2xl">
 								<Image
 									src="/images/about-alberto.jpg"
-									alt="Alberto, co-founder of InMedina."
+									alt="Alberto, manager and strategist of InMedina."
 									fill
 									className="object-cover"
 								/>
 							</div>
 							<div>
 								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-									Alberto – Co-founder, restoration &amp; craft
+									Alberto – Operations &amp; Project Logistics Manager
 								</p>
 								<h3 className="mt-3 text-xl font-semibold">
 									From blacksmithing in Sardinia to dunes in the Sahara
