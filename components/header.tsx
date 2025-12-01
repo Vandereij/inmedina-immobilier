@@ -1,14 +1,20 @@
 "use client";
+
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import SocialLinks from "./social-links";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import nmlogosvg from "../public/nmlogo.svg";
 import { Menu, X } from "lucide-react";
-import { getInitialsFromEmail } from "@/lib/utils";
 import { UserAvatar } from "./user-avatar";
+import { createClient } from "@/lib/supabase-client";
+import {
+	HoverCard,
+	HoverCardContent,
+	HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 type HeaderProps = {
 	isAdmin: boolean;
@@ -17,12 +23,37 @@ type HeaderProps = {
 
 export default function Header({ isAdmin, user }: HeaderProps) {
 	const pathname = usePathname();
+	const router = useRouter();
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
 	const isAuthPage = pathname?.startsWith("/auth");
 	const isHomePage = pathname === "/";
 
-	const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+	const supabase = createClient();
+
+	const navItems = [
+		{ name: "Home", url: "/" },
+		{ name: "Properties", url: "/properties" },
+		{ name: "Services", url: "/services" },
+		{ name: "Who we are", url: "/about-inmedina" },
+		{ name: "Contact us", url: "/contact" },
+	];
+
+	const toggleMobileMenu = () =>
+		setIsMobileMenuOpen((prev) => !prev);
 	const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+	const handleLogout = async () => {
+		// Sign out of Supabase
+		await supabase.auth.signOut();
+
+		// Close mobile menu if open
+		setIsMobileMenuOpen(false);
+
+		// Go to homepage and force a refresh so server components rerun
+		router.push("/");
+		router.refresh();
+	};
 
 	return (
 		<>
@@ -42,16 +73,10 @@ export default function Header({ isAdmin, user }: HeaderProps) {
 
 					<div>
 						{/* Desktop Navigation */}
-						<div className="hidden gap-6 text-sm text-neutral-700 md:flex">
-							{[
-								{ name: "Home", url: "/" },
-								{ name: "Properties", url: "/properties" },
-								{ name: "Services", url: "/services" },
-								{ name: "Who we are", url: "/about-inmedina" },
-								{ name: "Contact us", url: "/contact" },
-							].map((item, index) => (
+						<div className="hidden gap-6 text-sm text-neutral-700 md:flex items-center">
+							{navItems.map((item) => (
 								<Button
-									key={index}
+									key={item.url}
 									variant="linkHeader"
 									size="header"
 									asChild
@@ -68,10 +93,58 @@ export default function Header({ isAdmin, user }: HeaderProps) {
 											size="header"
 											asChild
 										>
-											<Link href={"/admin"}>Admin</Link>
+											<Link href="/admin">Admin</Link>
 										</Button>
 									)}
-									<UserAvatar email={user.email} />
+
+									<HoverCard openDelay={80} closeDelay={120}>
+										<HoverCardTrigger asChild>
+											<button
+												className="rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+												aria-label="User menu"
+											>
+												<UserAvatar email={user.email} />
+											</button>
+										</HoverCardTrigger>
+
+										<HoverCardContent
+											align="end"
+											className="w-64 space-y-3"
+										>
+											<div>
+												<div className="text-xs text-muted-foreground">
+													Signed in as
+												</div>
+												<div className="text-sm font-medium truncate">
+													{user.email ?? "Unknown"}
+												</div>
+											</div>
+
+											<div className="h-px bg-border" />
+
+											{isAdmin && (
+												<Button
+													variant="ghost"
+													size="sm"
+													className="w-full justify-start"
+													asChild
+												>
+													<Link href="/admin">
+														Admin
+													</Link>
+												</Button>
+											)}
+
+											<Button
+												variant="ghost"
+												size="sm"
+												className="w-full justify-start"
+												onClick={handleLogout}
+											>
+												Log out
+											</Button>
+										</HoverCardContent>
+									</HoverCard>
 								</>
 							) : (
 								<Button
@@ -80,7 +153,9 @@ export default function Header({ isAdmin, user }: HeaderProps) {
 									className="rounded-full hidden lg:flex"
 									asChild
 								>
-									<Link href="/auth">Login / Sign up</Link>
+									<Link href="/auth">
+										Login / Sign up
+									</Link>
 								</Button>
 							)}
 						</div>
@@ -128,61 +203,37 @@ export default function Header({ isAdmin, user }: HeaderProps) {
 						<X className="h-6 w-6" />
 					</Button>
 
-					<Button
-						className="justify-start"
-						size="lg"
-						variant="ghost"
-						asChild
-						onClick={closeMobileMenu}
-					>
-						<Link href="/" className="font-medium">
-							Home
-						</Link>
-					</Button>
+					{/* Mobile nav items (same as desktop) */}
+					{navItems.map((item) => (
+						<Button
+							key={item.url}
+							className="justify-start"
+							size="lg"
+							variant="ghost"
+							asChild
+							onClick={closeMobileMenu}
+						>
+							<Link href={item.url} className="font-medium">
+								{item.name}
+							</Link>
+						</Button>
+					))}
 
-					<Button
-						className="justify-start"
-						size="lg"
-						variant="ghost"
-						asChild
-						onClick={closeMobileMenu}
-					>
-						<Link href="/properties" className="font-medium">
-							Properties
-						</Link>
-					</Button>
+					{/* Admin link only when logged in & isAdmin */}
+					{user && isAdmin && (
+						<Button
+							className="justify-start"
+							size="lg"
+							variant="ghost"
+							asChild
+							onClick={closeMobileMenu}
+						>
+							<Link href="/admin">Admin</Link>
+						</Button>
+					)}
 
-					<Button
-						className="justify-start"
-						size="lg"
-						variant="ghost"
-						asChild
-						onClick={closeMobileMenu}
-					>
-						<Link href="/about-inmedina">Who We Are</Link>
-					</Button>
-
-					<Button
-						className="justify-start"
-						size="lg"
-						variant="ghost"
-						asChild
-						onClick={closeMobileMenu}
-					>
-						<Link href="/contact">Contact Us</Link>
-					</Button>
-
-					<Button
-						className="justify-start"
-						size="lg"
-						variant="ghost"
-						asChild
-						onClick={closeMobileMenu}
-					>
-						<Link href="/admin">Admin</Link>
-					</Button>
-
-					{!isAuthPage && (
+					{/* Auth actions */}
+					{!user && !isAuthPage && (
 						<Button
 							size="lg"
 							variant="default"
@@ -191,6 +242,17 @@ export default function Header({ isAdmin, user }: HeaderProps) {
 							onClick={closeMobileMenu}
 						>
 							<Link href="/auth">Login / Sign up</Link>
+						</Button>
+					)}
+
+					{user && (
+						<Button
+							size="lg"
+							variant="outline"
+							className="mt-4"
+							onClick={handleLogout}
+						>
+							Log out
 						</Button>
 					)}
 				</div>
