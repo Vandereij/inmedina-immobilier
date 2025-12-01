@@ -1,11 +1,5 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-server";
-import {
-	Card,
-	CardHeader,
-	CardContent,
-	CardFooter,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
@@ -127,27 +121,33 @@ export default async function PropertiesPage({
 				</div>
 			</div>
 
-			{/* 🏠 Properties Grid */}
+			{/* 🏠 Properties List (Strips) */}
 			<div className="flex justify-center">
 				<div className="w-8/12 pb-16">
 					<h2 className="text-xl md:text-2xl mb-10">
 						All Properties
 					</h2>
 
-					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+					{/* Strips instead of cards */}
+					<div className="flex flex-col gap-4">
 						{data?.map((p: any) => (
-							<Link key={p.id} href={`/admin/properties/${p.id}`}>
-								<Card className="shadow-none border-none overflow-hidden rounded-none gap-4">
-									<div className="relative">
+							<Link
+								key={p.id}
+								href={`/admin/properties/${p.id}`}
+								className="block"
+							>
+								<div className="flex flex-col sm:flex-row gap-4 border rounded-xl p-4 hover:bg-muted transition-colors">
+									{/* Image block */}
+									<div className="relative w-full sm:w-64 h-52 sm:h-40 flex-shrink-0 overflow-hidden rounded-lg">
 										<img
 											src={
 												p.cover_image_url ||
 												"https://images.unsplash.com/photo-1560448204-e02f11c3d0e2"
 											}
 											alt={p.title}
-											className="w-full h-60 object-cover"
+											className="w-full h-full object-cover"
 										/>
-										<div className="absolute top-4 left-4 gap-2 flex">
+										<div className="absolute top-3 left-3 flex gap-2">
 											{/* Status badge (draft/published) */}
 											<Badge
 												className="bg-[oklch(0.7_0_0/.50)] text-background uppercase text-xs rounded-md"
@@ -164,49 +164,72 @@ export default async function PropertiesPage({
 												variant="secondary"
 												className="bg-[oklch(0.7_0_0/.50)] text-background uppercase text-xs rounded-md"
 											>
-												{p.locations?.name || "Unknown"}
+												{p.locations?.name ||
+													"Unknown"}
 											</Badge>
 										</div>
 									</div>
-									<CardHeader>
-										<h3 className="font-semibold">
-											{p.title}
-										</h3>
-									</CardHeader>
-									<CardContent>
-										<div className="text-sm text-muted-foreground grid grid-cols-5">
+
+									{/* Content block */}
+									<div className="flex flex-1 flex-col justify-between gap-2">
+										<div>
+											<div className="flex items-start justify-between gap-2">
+												<h3 className="font-semibold line-clamp-2">
+													{p.title}
+												</h3>
+												<div className="text-sm font-semibold whitespace-nowrap">
+													{p.currency}{" "}
+													{Number(
+														p.price
+													).toLocaleString()}
+												</div>
+											</div>
+
+											<div className="mt-1 text-xs uppercase text-muted-foreground flex flex-wrap gap-2">
+												{p.property_type && (
+													<span>
+														{p.property_type}
+													</span>
+												)}
+												{p.availability_type && (
+													<span>
+														• {p.availability_type}
+													</span>
+												)}
+											</div>
+										</div>
+
+										<div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
 											{p.bedrooms && (
 												<div className="flex items-center gap-1">
 													<LucideBedDouble className="size-4" />
-													{p.bedrooms}
+													<span>{p.bedrooms}</span>
 												</div>
 											)}
 											{p.bathrooms && (
 												<div className="flex items-center gap-1">
 													<LucideBath className="size-4" />
-													{p.bathrooms}
+													<span>{p.bathrooms}</span>
 												</div>
 											)}
 											{p.area_sqm && (
-												<div className="flex items-center gap-1 col-span-2">
+												<div className="flex items-center gap-1">
 													<LucideRulerDimensionLine className="size-4" />
-													{p.area_sqm + "m\u00B2"}
+													<span>
+														{p.area_sqm + "m\u00B2"}
+													</span>
 												</div>
 											)}
 										</div>
-									</CardContent>
 
-									<CardFooter className="flex place-content-between items-center">
-										<div className="text-sm text-muted-foreground flex items-center">
+										<div className="mt-3 flex items-center text-sm text-muted-foreground">
 											<LucideMapPin className="size-4 mr-1" />
-											{p.address_line1}
+											<span className="line-clamp-1">
+												{p.address_line1}
+											</span>
 										</div>
-										<div className="price font-semibold">
-											{p.currency}{" "}
-											{Number(p.price).toLocaleString()}
-										</div>
-									</CardFooter>
-								</Card>
+									</div>
+								</div>
 							</Link>
 						))}
 					</div>
