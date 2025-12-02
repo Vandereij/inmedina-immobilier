@@ -138,7 +138,7 @@ export default async function PropertiesPage({
 							>
 								<div className="flex flex-col sm:flex-row gap-4 border rounded-xl p-4 hover:bg-muted transition-colors">
 									{/* Image block */}
-									<div className="relative w-full sm:w-64 h-52 sm:h-40 flex-shrink-0 overflow-hidden rounded-lg">
+									<div className="relative w-full sm:w-64 h-52 sm:h-40 shrink-0 overflow-hidden rounded-lg">
 										<img
 											src={
 												p.cover_image_url ||
