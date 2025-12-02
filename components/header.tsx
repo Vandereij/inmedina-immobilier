@@ -73,7 +73,7 @@ export default function Header({ isAdmin, user }: HeaderProps) {
 
 					<div>
 						{/* Desktop Navigation */}
-						<div className="hidden gap-6 text-sm text-neutral-700 md:flex items-center">
+						<div className="hidden gap-6 text-sm text-neutral-700 lg:flex items-center">
 							{navItems.map((item) => (
 								<Button
 									key={item.url}
@@ -162,7 +162,7 @@ export default function Header({ isAdmin, user }: HeaderProps) {
 
 						{/* Mobile Menu Button */}
 						<Button
-							variant={isHomePage ? "default" : "ghost"}
+							variant="default"
 							size="icon"
 							className="lg:hidden"
 							onClick={toggleMobileMenu}
