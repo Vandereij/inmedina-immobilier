@@ -50,7 +50,7 @@ export default function AuthPage() {
 	}
 
 	return (
-		<div className="mx-auto max-w-md border rounded-2xl p-6 grid gap-6">
+		<div className="mx-auto max-w-md border rounded-2xl my-20 p-6 grid gap-6">
 			<div className="flex justify-center">
 				<div className="w-10/12">
 					<div className="flex items-center justify-between mb-2">
