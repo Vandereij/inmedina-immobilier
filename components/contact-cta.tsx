@@ -68,50 +68,28 @@ export default function ContactCta() {
   };
 
   const handleEnquirySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!enquiryEmail || !enquiryMessage) {
-      setEnquiryStatus("error");
-      setEnquiryFeedback("Please provide at least your email and a message.");
-      return;
-    }
+  try {
+    const res = await fetch("/api/enquiry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: enquiryName,
+        email: enquiryEmail,
+        message: enquiryMessage,
+      }),
+    });
 
-    setEnquiryStatus("loading");
-    setEnquiryFeedback("");
+    console.log("Response status:", res.status);
+    const data = await res.json().catch(() => null);
+    console.log("Response data:", data);
 
-    try {
-      const res = await fetch("/api/enquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: enquiryName,
-          email: enquiryEmail,
-          message: enquiryMessage,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data?.error) {
-        setEnquiryStatus("error");
-        setEnquiryFeedback(data?.error || "Failed to send enquiry. Please try again.");
-        return;
-      }
-
-      setEnquiryStatus("success");
-      setEnquiryFeedback(data?.message || "Your enquiry has been sent.");
-      setEnquiryName("");
-      setEnquiryEmail("");
-      setEnquiryMessage("");
-
-      // optionally close after a short delay; or comment this out if you prefer manual close
-      setIsDialogOpen(false);
-    } catch (err) {
-      console.error(err);
-      setEnquiryStatus("error");
-      setEnquiryFeedback("Network error. Please try again.");
-    }
-  };
+    // ...your existing success/error handling...
+  } catch (error) {
+    console.error("Fetch threw:", error);
+  }
+};
 
   return (
     <section className="bg-[#f8f3ee]">
