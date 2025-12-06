@@ -141,12 +141,13 @@ export default function ContactCta() {
 
               <form onSubmit={handleEnquirySubmit} className="space-y-4">
                 <div className="text-left space-y-2">
-                  <label className="text-sm font-medium">Name (optional)</label>
+                  <label className="text-sm font-medium">Name</label>
                   <Input
                     placeholder="Your name"
                     value={enquiryName}
                     onChange={(e) => setEnquiryName(e.target.value)}
                     className="bg-[#f8f3ee]/80"
+                    required
                   />
                 </div>
                 <div className="text-left space-y-2">
