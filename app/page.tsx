@@ -7,19 +7,14 @@ import Link from "next/link";
 import PropertyCardList from "@/components/property-card-list";
 import Image from "next/image";
 
-export default async function HomePage() {
-	  const start = Date.now();
-  console.time("handler");
-	const supabase = await useMemo(() => createClient(), []);
+export const revalidate = 3600;
 
-  console.time("supabase-query");
+export default async function HomePage() {
+	const supabase = await useMemo(() => createClient(), []);
 	const { data: locations } = await supabase
 		.from("locations")
-		.select("*")
+		.select("id, name, slug")
 		.order("name");
-  console.timeEnd("supabase-query");
-  console.timeEnd("handler");
-  console.log("total handler time", Date.now() - start, "ms");
 	return (
 		<>
 			<Hero />
@@ -138,9 +133,9 @@ export default async function HomePage() {
 								<p className="mt-5 text-base leading-relaxed text-muted-foreground">
 									We restore and transform properties using
 									traditional Moroccan craftsmanship—zellige,
-									tadelakt, carved cedar, and
-									ironwork, combined with modern design
-									sensibilities for comfort and longevity.
+									tadelakt, carved cedar, and ironwork,
+									combined with modern design sensibilities
+									for comfort and longevity.
 								</p>
 								<ul className="mt-4 space-y-1 text-sm text-muted-foreground">
 									<li>Concept & design direction</li>
