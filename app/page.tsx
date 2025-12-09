@@ -8,11 +8,18 @@ import PropertyCardList from "@/components/property-card-list";
 import Image from "next/image";
 
 export default async function HomePage() {
+	  const start = Date.now();
+  console.time("handler");
 	const supabase = await useMemo(() => createClient(), []);
+
+  console.time("supabase-query");
 	const { data: locations } = await supabase
 		.from("locations")
 		.select("*")
 		.order("name");
+  console.timeEnd("supabase-query");
+  console.timeEnd("handler");
+  console.log("total handler time", Date.now() - start, "ms");
 	return (
 		<>
 			<Hero />
