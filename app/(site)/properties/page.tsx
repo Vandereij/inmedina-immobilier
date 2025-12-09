@@ -126,26 +126,40 @@ export default async function PropertiesPage({
 
 	return (
 		<section className="flex flex-col gap-20">
-			<div className="relative h-[500px] w-full overflow-hidden shadow-lg">
+			{/* HERO */}
+			<div className="relative h-[500px] w-full overflow-hidden border-b border-border">
+				{/* Background image (unchanged) */}
 				<img
 					src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1920&auto=format&fit=crop"
 					alt="Luxury homes hero banner"
-					className="absolute inset-0 w-full h-full object-cover"
+					className="absolute inset-0 h-full w-full object-cover"
 				/>
-				<div className="absolute inset-0 bg-linear-to-b from-black/65 to-black/85 flex items-center justify-center text-center px-6">
-					<div className="max-w-2xl text-white space-y-4">
-						<h1 className="text-xl md:text-2xl font-medium">
-							Discover Exceptional Moroccan Properties
-						</h1>
-						<p className="text-gray-200">
-							From traditional riads to contemporary villas,
-							explore our curated collection of properties across
-							Morocco. Each listing reflects our commitment to
-							quality, authenticity, and prime locations.
+
+				{/* Dark overlay */}
+				<div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/75 to-black/85" />
+
+				{/* Content with same style as Services section */}
+				<div className="relative mx-auto flex h-full max-w-7xl items-center px-4 py-20 md:px-8">
+					<div className="max-w-3xl text-white">
+						<p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+							Properties
 						</p>
-						<div className="flex justify-center gap-4 mt-8">
-							<Button asChild size="sm" variant="secondary">
-								<Link href="/contact">Contact Us</Link>
+
+						<h1 className="mt-4 max-w-3xl font-serif text-4xl md:text-5xl">
+							Curated homes and riads across Morocco
+						</h1>
+
+						<p className="mt-6 max-w-2xl text-base leading-relaxed text-gray-200">
+							Explore a selection of riads, villas, and apartments
+							chosen for their character, location, and potential.
+							Whether you’re buying, renting, or planning a
+							restoration, we help you move with clarity and
+							confidence.
+						</p>
+
+						<div className="mt-8 flex flex-wrap gap-3">
+							<Button asChild>
+								<Link href="/contact">Book a consultation</Link>
 							</Button>
 						</div>
 					</div>

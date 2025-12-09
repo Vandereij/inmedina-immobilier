@@ -8,32 +8,49 @@ export default function AboutInmedina() {
 		<>
 			{/* Hero / Intro (structure kept the same as Services hero) */}
 			<section className="bg-background border-b border-border">
-				<div className="mx-auto max-w-7xl px-4 py-20 md:px-8">
-					<p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
-						About
-					</p>
-					<h1 className="mt-4 max-w-3xl font-serif text-4xl md:text-5xl">
-						Moroccan property shaped by lived experience, not theory
-					</h1>
-					<p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground">
-						InMedina grew out of years spent welcoming guests to
-						Morocco and restoring houses in its historic
-						neighborhoods. Today we use that ground-level experience
-						to help buyers and investors find, shape, and enjoy
-						properties that feel genuinely connected to place.
-					</p>
+				<div className="relative h-[500px] w-full overflow-hidden border-b border-border">
+					{/* Background image (unchanged) */}
+					<img
+						src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1920&auto=format&fit=crop"
+						alt="Luxury homes hero banner"
+						className="absolute inset-0 h-full w-full object-cover"
+					/>
 
-					<div className="mt-8 flex flex-wrap gap-3">
-						<Button asChild>
-							<Link href="/contact">
-								Schedule an introduction call
-							</Link>
-						</Button>
-						<Button variant="outline" asChild>
-							<Link href="/properties">
-								Explore our selected properties
-							</Link>
-						</Button>
+					{/* Dark overlay */}
+					<div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/75 to-black/85" />
+
+					{/* Content with same style as Services section */}
+					<div className="relative mx-auto flex h-full max-w-7xl items-center px-4 py-20 md:px-8">
+						<div className="max-w-3xl text-white">
+							<p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+								About
+							</p>
+							<h1 className="mt-4 max-w-3xl font-serif text-4xl md:text-5xl">
+								Moroccan property shaped by lived experience,
+								not theory
+							</h1>
+							<p className="mt-6 max-w-2xl text-base leading-relaxed text">
+								InMedina grew out of years spent welcoming
+								guests to Morocco and restoring houses in its
+								historic neighborhoods. Today we use that
+								ground-level experience to help buyers and
+								investors find, shape, and enjoy properties that
+								feel genuinely connected to place.
+							</p>
+
+							<div className="mt-8 flex flex-wrap gap-3">
+								<Button asChild>
+									<Link href="/contact">
+										Schedule an introduction call
+									</Link>
+								</Button>
+								<Button asChild>
+									<Link href="/properties">
+										Explore our selected properties
+									</Link>
+								</Button>
+							</div>
+						</div>
 					</div>
 				</div>
 			</section>
