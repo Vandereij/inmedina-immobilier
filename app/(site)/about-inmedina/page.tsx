@@ -29,7 +29,7 @@ export default function AboutInmedina() {
 								Moroccan property shaped by lived experience,
 								not theory
 							</h1>
-							<p className="mt-6 max-w-2xl text-base leading-relaxed text">
+							<p className="mt-6 max-w-2xl text-base leading-relaxed">
 								InMedina grew out of years spent welcoming
 								guests to Morocco and restoring houses in its
 								historic neighborhoods. Today we use that
@@ -67,7 +67,7 @@ export default function AboutInmedina() {
 							in Moroccan hospitality, running guest houses,
 							restoring riads, and learning how travelers actually
 							experience these spaces. Those years taught us what
-							really matters: good bones, thoughtful circulation,
+							truly matters: good bones, thoughtful circulation,
 							reliable comfort, and a feeling of ease the moment
 							you step inside. Now we bring that perspective to
 							buyers and investors who want properties that are
@@ -132,13 +132,14 @@ export default function AboutInmedina() {
 							Two different journeys leading to the same medina
 						</h2>
 						<p className="mt-6 text-base leading-relaxed text-muted-foreground">
-							InMedina was born from two parallel stories: one of
-							returning to Morocco again and again, drawn by its
-							balance of intensity and quiet; the other of leaving
-							a traditional craft behind to follow the call of the
-							desert. Together, they shape how we approach each
-							property: with curiosity, respect, and a clear sense
-							of what really works for the people who will use it.
+							InMedina grew out of two parallel paths: one shaped
+							by returning to Morocco again and again, drawn by
+							its balance of intensity and calm; the other by
+							leaving a traditional craft behind to follow the
+							call of the desert. Together, these experiences
+							shape how we approach each property, with curiosity,
+							respect, and a clear sense of what truly works for
+							the people who will use it.
 						</p>
 					</div>
 
@@ -182,7 +183,7 @@ export default function AboutInmedina() {
 									experience people imagine online matches
 									what they&apos;ll actually find when they
 									arrive. His work is about clarity and
-									trust—helping travelers understand what
+									trust, helping people understand what
 									they&apos;re choosing, and why it might be
 									exactly what they need.
 								</p>
@@ -194,7 +195,7 @@ export default function AboutInmedina() {
 							<div className="relative h-64 w-full overflow-hidden rounded-2xl">
 								<Image
 									src="/images/about-alberto.jpg"
-									alt="Alberto, manager and strategist of InMedina."
+									alt="Alberto – Operations & Project Logistics Manager at InMedina."
 									fill
 									className="object-cover"
 								/>
@@ -220,17 +221,15 @@ export default function AboutInmedina() {
 									and look beneath the surface of things.
 								</p>
 								<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-									That practical sensibility now drives how he
-									manages projects and daily operations. He
-									coordinates renovations, oversees
-									maintenance, works with local suppliers and
-									craftspeople, and makes sure each property
-									functions as it should. His role is about
-									solving problems before guests notice them,
-									keeping timelines realistic, and ensuring
-									that the houses InMedina offers are actually
-									ready to welcome people: not just beautiful
-									in theory, but solid in practice.
+									That practical sensibility now guides how he
+									supports projects and day-to-day logistics.
+									He coordinates with local suppliers and
+									craftspeople, helps oversee renovation
+									progress, and focuses on making sure each
+									project moves forward in a grounded,
+									realistic way, so that the properties our
+									clients choose are not just beautiful in
+									theory, but solid and welcoming in practice.
 								</p>
 							</div>
 						</article>
@@ -316,6 +315,20 @@ export default function AboutInmedina() {
 							or diversifying their investments. Whatever brings
 							you to Morocco, we are here to make the journey
 							grounded, transparent, and genuinely enjoyable.
+						</p>
+					</div>
+
+					{/* Legal / platform clarification note */}
+					<div className="mt-8 max-w-3xl text-[11px] leading-relaxed text-secondary-foreground/70">
+						<p>
+							<strong>Note:</strong> InMedina operates as a
+							UK-based platform. While we offer guidance, project
+							insight, and property evaluation expertise, all real
+							estate, renovation, and on-the-ground services in
+							Morocco are carried out by independent third-party
+							companies. These providers work autonomously and are
+							solely responsible for their services and
+							agreements.
 						</p>
 					</div>
 				</div>

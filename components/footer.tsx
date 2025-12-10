@@ -36,21 +36,26 @@ export default function Footer() {
 						clients.
 					</p>
 				</div>
+
 				<div className="flex flex-wrap gap-6 text-xs text-neutral-500">
 					<div>
 						<div className="font-medium text-neutral-700">
 							Explore Area
 						</div>
 						<ul className="mt-1 space-y-1">
-						{locations && locations.map((item) => (
-							<li key={item.id}>
-								<a href={`/properties?locationId=${item.id}`} className="hover:text-[#c98a5a]">
-									{item.name}
-								</a>
-							</li>
-						))}
+							{locations && locations.map((item) => (
+								<li key={item.id}>
+									<a
+										href={`/properties?locationId=${item.id}`}
+										className="hover:text-[#c98a5a]"
+									>
+										{item.name}
+									</a>
+								</li>
+							))}
 						</ul>
 					</div>
+
 					<div>
 						<div className="font-medium text-neutral-700">
 							Connect
@@ -60,7 +65,32 @@ export default function Footer() {
 					</div>
 				</div>
 			</div>
-			<div className="mt-6 text-center text-xs text-neutral-400">
+
+			{/* --- MICRO DISCLAIMER --- */}
+			<div className="mt-6 text-center text-[10px] leading-relaxed text-neutral-400 px-4">
+				InMedina provides platform guidance only; all real estate 
+				and renovation services in Morocco are performed by 
+				independent third-party providers.
+			</div>
+
+			{/* --- LEGAL LINKS --- */}
+			<div className="mt-3 flex justify-center gap-4 text-[10px] text-neutral-400">
+				<a 
+					href="/terms" 
+					className="hover:text-[#c98a5a] transition-colors"
+				>
+					Terms &amp; Conditions
+				</a>
+				<span>·</span>
+				<a 
+					href="/privacy" 
+					className="hover:text-[#c98a5a] transition-colors"
+				>
+					Privacy Policy
+				</a>
+			</div>
+
+			<div className="mt-3 text-center text-xs text-neutral-400">
 				© {new Date().getFullYear()} InMedina - All rights reserved
 			</div>
 		</footer>

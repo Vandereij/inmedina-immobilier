@@ -141,7 +141,7 @@ export default function ContactPage() {
 							understanding local rhythms and regulations as it is
 							about architecture. Share a little about your plans
 							and we&apos;ll respond with honest, grounded
-							feedback—not a generic sales pitch.
+							feedback, not a generic sales pitch.
 						</p>
 						<p className="mt-4 text-base leading-relaxed text-muted-foreground">
 							We regularly support:

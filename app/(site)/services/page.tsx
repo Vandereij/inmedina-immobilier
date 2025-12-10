@@ -21,7 +21,7 @@ export default function ServicesPage() {
 					{/* Dark overlay */}
 					<div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/75 to-black/85" />
 
-					{/* Content with same style as Services section */}
+					{/* Content */}
 					<div className="relative mx-auto flex h-full max-w-7xl items-center px-4 py-20 md:px-8">
 						<div className="max-w-3xl text-white">
 							<p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
@@ -32,12 +32,13 @@ export default function ServicesPage() {
 								in Morocco
 							</h1>
 							<p className="mt-6 max-w-2xl text-base leading-relaxed">
-								InMedina helps you find, purchase, restore, and
-								enjoy Moroccan properties with confidence. From
+								InMedina helps you navigate the process of
+								finding, purchasing, restoring, and enjoying
+								Moroccan properties with more clarity. From
 								first ideas to a finished riad or villa ready
-								for guests, we combine local knowledge and
-								hospitality experience so that every step feels
-								clear and well supported.
+								for guests, we combine lived experience and
+								local connections so that every step feels more
+								understandable and well supported.
 							</p>
 
 							<div className="mt-8 flex flex-wrap gap-3">
@@ -48,7 +49,7 @@ export default function ServicesPage() {
 								</Button>
 								<Button asChild>
 									<Link href="/properties">
-										View current listings
+										View selected properties
 									</Link>
 								</Button>
 							</div>
@@ -62,28 +63,29 @@ export default function ServicesPage() {
 				<div className="mx-auto max-w-7xl px-4 py-16 md:px-8 md:grid md:grid-cols-2 md:gap-16">
 					<div className="mb-10 md:mb-0">
 						<h2 className="font-serif text-2xl md:text-3xl">
-							More than a real estate agency
+							More than a property search
 						</h2>
 						<p className="mt-4 text-base leading-relaxed text-muted-foreground">
 							Buying a property in Morocco is exciting, but it can
 							also feel overwhelming if you are new to the market.
-							Our team has spent years running successful guest
-							houses and working with architects, artisans, and
-							legal partners. That experience allows us to guide
-							you through the small decisions that make a big
-							difference to the long term value and enjoyment of
+							Our team has spent years running guest houses and
+							collaborating with architects, artisans, and legal
+							professionals. That experience allows us to
+							highlight the small decisions that make a big
+							difference to the long-term comfort and potential of
 							your home.
 						</p>
 					</div>
 					<div className="space-y-4 text-sm text-muted-foreground">
 						<div>
 							<p className="font-medium text-primary">
-								Local expertise
+								Local insight
 							</p>
 							<p className="mt-1">
-								We understand how medina neighborhoods work, how
-								building regulations are applied in practice,
-								and what guests look for when choosing a stay.
+								We understand medina neighborhoods, how
+								buildings are actually used and adapted over
+								time, and what guests look for when choosing a
+								stay.
 							</p>
 						</div>
 						<div>
@@ -92,18 +94,23 @@ export default function ServicesPage() {
 							</p>
 							<p className="mt-1">
 								We look at structure, light, circulation, and
-								layout, not just surface finishes, so you invest
-								in a property that will age well.
+								layout, not just surface finishes, so you can
+								focus on properties that have the right
+								fundamentals for your plans.
 							</p>
 						</div>
 						<div>
 							<p className="font-medium text-primary">
-								Clear, honest advice
+								Clear, honest guidance
 							</p>
 							<p className="mt-1">
 								We are transparent about the work a building may
-								need, expected timelines, and realistic rental
-								performance, so you can plan with confidence.
+								need, likely timelines, and broad rental
+								potential ranges, so you can ask the right
+								questions and plan your next steps with more
+								confidence. Formal legal, tax, or investment
+								advice always sits with your chosen
+								professionals.
 							</p>
 						</div>
 					</div>
@@ -124,10 +131,11 @@ export default function ServicesPage() {
 						</h2>
 						<p className="mt-6 text-base leading-relaxed text-secondary-foreground/80">
 							Whether you want to buy a private riad, open a guest
-							house, or renovate a historic home for occasional
-							stays, we provide clear and practical support. You
+							house, or refresh a historic home for occasional
+							stays, we offer grounded, practical guidance. You
 							can work with us on a single stage or from first
-							viewing through to opening your doors.
+							viewing through to welcoming your first guests, in
+							collaboration with independent local specialists.
 						</p>
 					</div>
 
@@ -145,7 +153,7 @@ export default function ServicesPage() {
 
 							<div className="md:col-span-3 max-w-prose text-secondary-foreground">
 								<p className="text-xs font-medium uppercase tracking-[0.2em] text-accent">
-									Property sourcing and sales
+									Property sourcing and selection
 								</p>
 								<h3 className="mt-4 text-2xl font-semibold">
 									Finding the right riad, villa, or retreat
@@ -153,11 +161,11 @@ export default function ServicesPage() {
 								<p className="mt-5 text-base leading-relaxed text-secondary-foreground/80">
 									Instead of browsing hundreds of generic
 									listings, you receive a curated selection of
-									Moroccan properties that match your brief.
-									We focus on houses and apartments with
-									strong fundamentals, good light, and clear
-									potential, whether you plan to live in the
-									property or welcome guests.
+									Moroccan properties that align with your
+									brief. We focus on houses and apartments
+									with strong fundamentals, good light, and
+									clear potential, whether you plan to live in
+									the property or welcome guests.
 								</p>
 								<ul className="mt-4 space-y-1 text-sm text-secondary-foreground/75">
 									<li>
@@ -165,20 +173,22 @@ export default function ServicesPage() {
 										and goals
 									</li>
 									<li>
-										Accompanied viewings and honest feedback
-										on each option
+										Accompanied or remote viewings with
+										honest, experience-based feedback on
+										each option
 									</li>
 									<li>
-										Support with negotiation and the
-										purchase process
+										General guidance on the typical purchase
+										process and introductions to qualified
+										local professionals where needed
 									</li>
 								</ul>
 								<p className="mt-4 text-sm text-secondary-foreground/70">
-									This service is ideal if you are at the
-									stage of comparing neighborhoods,
-									considering different property types, or
-									want a trusted local partner to represent
-									your interests.
+									This service is ideal if you are comparing
+									neighborhoods, considering different
+									property types, or want someone on your side
+									to help you interpret what you are seeing on
+									the ground.
 								</p>
 								<div className="mt-6 flex flex-wrap gap-3">
 									<Button size="sm" variant="outline" asChild>
@@ -203,7 +213,7 @@ export default function ServicesPage() {
 
 							<div className="md:order-1 md:col-span-3 max-w-prose text-secondary-foreground">
 								<p className="text-xs font-medium uppercase tracking-[0.2em] text-accent">
-									Renovation and restoration
+									Renovation and restoration guidance
 								</p>
 								<h3 className="mt-4 text-2xl font-semibold">
 									Transforming character properties with care
@@ -212,31 +222,34 @@ export default function ServicesPage() {
 									Many of the most interesting Moroccan
 									buildings need work before they feel
 									comfortable and ready for modern living. We
-									help you plan and coordinate renovation
-									projects that respect original details while
-									introducing thoughtful upgrades to layout,
-									lighting, plumbing, and climate control.
+									help you think through renovation scenarios,
+									clarify your priorities, and stay in the
+									loop as independent architects, contractors,
+									and craftspeople carry out the work.
 								</p>
 								<ul className="mt-4 space-y-1 text-sm text-secondary-foreground/75">
 									<li>
-										Concept development and high level
-										design direction
+										Concept discussions and high-level
+										direction for layout and atmosphere
 									</li>
 									<li>
-										Connections to experienced architects
-										and artisans
+										Connections to experienced architects,
+										engineers, and artisans
 									</li>
 									<li>
-										Regular updates, site visits, and
-										progress reports
+										Check-ins, informal site visits, and
+										summary updates to help you feel
+										informed from a distance
 									</li>
 								</ul>
 								<p className="mt-4 text-sm text-secondary-foreground/70">
-									We work with traditional materials such as
-									zellige, tadelakt, carved cedar, and
-									ironwork, and combine them with simple
+									We love working with traditional materials
+									such as zellige, tadelakt, carved cedar, and
+									ironwork, and combining them with simple
 									contemporary finishes that feel fresh rather
-									than theme based.
+									than theme-based. Execution and technical
+									responsibility always sit with the licensed
+									professionals you appoint.
 								</p>
 								<div className="mt-6 flex flex-wrap gap-3">
 									<Button size="sm" asChild>
@@ -253,7 +266,7 @@ export default function ServicesPage() {
 							<div className="relative h-56 md:h-72 overflow-hidden md:col-span-2 rounded-2xl">
 								<Image
 									src="/images/service-consulting.jpg"
-									alt="Consultation about Moroccan real estate strategy."
+									alt="Consultation about Moroccan property strategy."
 									fill
 									className="object-cover transition-transform duration-500 hover:scale-105"
 								/>
@@ -261,39 +274,43 @@ export default function ServicesPage() {
 
 							<div className="md:col-span-3 max-w-prose text-secondary-foreground">
 								<p className="text-xs font-medium uppercase tracking-[0.2em] text-accent">
-									Advisory and planning
+									Advisory and planning sessions
 								</p>
 								<h3 className="mt-4 text-2xl font-semibold">
-									Strategic advice before you commit
+									Strategic orientation before you commit
 								</h3>
 								<p className="mt-5 text-base leading-relaxed text-secondary-foreground/80">
 									If you are still deciding whether to buy, or
-									you are weighing up several projects, a
-									focused consultation can save you time and
-									money. We help you understand legal
-									structures, renovation costs, and likely
-									rental performance so that you can move
-									forward with a realistic plan.
+									you are weighing several projects, a focused
+									conversation can save time and uncertainty.
+									We share context on common ownership models,
+									typical renovation cost drivers, and broad
+									rental positioning, so you can speak to your
+									legal, tax, and financial advisors with a
+									clearer brief.
 								</p>
 								<ul className="mt-4 space-y-1 text-sm text-secondary-foreground/75">
 									<li>
-										One to one calls to explore your ideas
-										and constraints
+										One-to-one calls to explore your ideas,
+										constraints, and questions
 									</li>
 									<li>
-										Context on local regulations and
-										ownership models
+										General context on local regulations and
+										property structures (not a substitute
+										for formal legal advice)
 									</li>
 									<li>
-										Guidance on rental strategy and guest
-										expectations
+										Guidance on guest expectations and
+										positioning within the hospitality
+										landscape
 									</li>
 								</ul>
 								<p className="mt-4 text-sm text-secondary-foreground/70">
 									This works well if you are at the research
-									stage, need a second opinion on a specific
-									property, or want to understand whether your
-									budget matches your ambitions.
+									stage, need a grounded second view on a
+									specific property, or want to test whether
+									your budget and ambitions are pointing in a
+									realistic direction.
 								</p>
 								<div className="mt-6 flex flex-wrap gap-3">
 									<Button size="sm" variant="outline" asChild>
@@ -305,7 +322,7 @@ export default function ServicesPage() {
 							</div>
 						</div>
 
-						{/* Optional: Ongoing support */}
+						{/* Ongoing support */}
 						<div className="grid items-start gap-10 md:grid-cols-5 md:gap-12 border-t border-border pt-14">
 							<div className="md:col-span-2">
 								<h3 className="text-2xl font-semibold text-secondary-foreground">
@@ -314,36 +331,51 @@ export default function ServicesPage() {
 							</div>
 							<div className="md:col-span-3 max-w-prose text-secondary-foreground">
 								<p className="text-base leading-relaxed text-secondary-foreground/80">
-									Many clients stay in touch after a project
-									is complete. We can introduce you to
-									property managers, housekeeping teams,
-									photographers, and other specialists who
-									help keep your home or guest house running
-									smoothly and looking its best.
+									Many clients stay in touch after a purchase
+									or project is complete. We can point you
+									towards property managers, housekeeping
+									teams, photographers, and other specialists
+									who help keep your home or guest house
+									running smoothly and looking its best.
 								</p>
 								<ul className="mt-4 space-y-1 text-sm text-secondary-foreground/75">
 									<li>
-										Recommendations for operations and guest
-										experience
+										Suggestions for operations, guest
+										experience, and presentation
 									</li>
 									<li>
-										Suggestions for seasonal improvements
-										and upgrades
+										Ideas for seasonal improvements and
+										thoughtful upgrades
 									</li>
 									<li>
-										Access to a network of reliable local
-										partners
+										Access to a network of independent,
+										trusted local partners
 									</li>
 								</ul>
 								<p className="mt-4 text-sm text-secondary-foreground/70">
 									You decide how involved you would like us to
-									be. Some owners prefer regular check ins,
-									while others ask for advice only at key
+									be. Some owners prefer regular check-ins,
+									while others ask for support only at key
 									milestones such as a new phase of renovation
 									or a change in rental strategy.
 								</p>
 							</div>
 						</div>
+					</div>
+
+					{/* Small legal/platform note */}
+					<div className="mt-16 max-w-3xl text-[11px] leading-relaxed text-secondary-foreground/70">
+						<p>
+							<strong>Note:</strong> InMedina operates as a
+							UK-based platform. We offer experience-based
+							guidance and introductions, but we do not provide
+							legal, tax, architectural, engineering, or brokerage
+							services. All on-the-ground real estate,
+							construction, and renovation work in Morocco is
+							carried out by independent third-party companies,
+							who are solely responsible for their services and
+							professional advice.
+						</p>
 					</div>
 				</div>
 			</section>

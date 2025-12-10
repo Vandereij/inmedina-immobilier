@@ -132,7 +132,7 @@ export default async function HomePage() {
 								</h3>
 								<p className="mt-5 text-base leading-relaxed text-muted-foreground">
 									We restore and transform properties using
-									traditional Moroccan craftsmanship—zellige,
+									traditional Moroccan craftsmanship: zellige,
 									tadelakt, carved cedar, and ironwork,
 									combined with modern design sensibilities
 									for comfort and longevity.

@@ -26,7 +26,7 @@ export default function Hero() {
 						</h2>
 						<p className="mt-5 max-w-prose text-neutral-800 md:text-lg">
 							A curated portfolio of riads, villas, and
-							retreats—crafted for modern living and timeless
+							retreats, crafted for modern living and timeless
 							elegance.
 						</p>
 						<div className="mt-8 flex flex-wrap gap-3">
