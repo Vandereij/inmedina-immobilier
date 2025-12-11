@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     console.log("[/api/enquiry] Sending email via Resend…");
 
     const { error } = await resend.emails.send({
-      from: "Enquiries <info@inmedina.com>", // must use a verified domain in Resend
+      from: "Enquiries <realestate@inmedina.com>", // must use a verified domain in Resend
       to: [toEmail],
       replyTo: email,
       subject,

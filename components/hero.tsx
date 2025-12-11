@@ -25,9 +25,8 @@ export default function Hero() {
 							Where Heritage Meets Modern Living
 						</h2>
 						<p className="mt-5 max-w-prose text-neutral-800 md:text-lg">
-							A curated portfolio of riads, villas, and
-							retreats, crafted for modern living and timeless
-							elegance.
+							A curated portfolio of riads, villas, and retreats,
+							crafted for modern living and timeless elegance.
 						</p>
 						<div className="mt-8 flex flex-wrap gap-3">
 							<Button className="rounded-full bg-[#c98a5a] text-white shadow-sm hover:bg-[#b37750]">
