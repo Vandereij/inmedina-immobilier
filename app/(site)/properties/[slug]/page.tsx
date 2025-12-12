@@ -11,25 +11,49 @@ type Props = {
 	params: Promise<{ slug: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+import { buildMetadata } from "@/lib/seo";
+
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
 	const { slug } = await params;
 	const supabase = await createClient();
 
 	const { data: property, error } = await supabase
 		.from("properties")
-		.select("seo_title, seo_description, status")
+		.select(
+			"title, excerpt, seo_title, seo_description, seo_canonical, seo_robots, status"
+		)
 		.eq("slug", slug)
 		.maybeSingle();
 
-	if (error || !property || property.status !== "published") {
-		return { title: "Property Not Found" };
+	if (error) {
+		console.error("[generateMetadata] Supabase error:", error);
 	}
 
-	return {
-		title: property.seo_title,
+	/** Fallback metadata if property is missing */
+	const fallback: Metadata = {
+		title: "Property not found | Real Estate InMedina",
 		description:
-			property.seo_description || `View details for ${property.seo_title}`,
+			"Explore carefully selected properties across Morocco with Real Estate InMedina.",
+		robots: {
+			index: false,
+			follow: false,
+		},
 	};
+
+	if (!property) {
+		return fallback;
+	}
+
+	const defaults: Metadata = {
+		title: `Property ${property.title} | Real Estate InMedina`,
+		description: property.excerpt ?? undefined,
+	};
+
+	return buildMetadata(property, defaults);
 }
 
 export default async function PropertyDetail({ params }: Props) {
@@ -46,7 +70,7 @@ export default async function PropertyDetail({ params }: Props) {
 
 	// --- Placeholder Data for New Sections ---
 	const inmedina = {
-		title: "InMedina Team is here to respond to all your enquiries. Don't esitate to contact us via the form or WhatsApp"
+		title: "InMedina Team is here to respond to all your enquiries. Don't esitate to contact us via the form or WhatsApp",
 	};
 
 	const floorPlanUrl = property.floor_plan_image_url; // Placeholder
@@ -272,12 +296,12 @@ export default async function PropertyDetail({ params }: Props) {
 									Contact for more information
 								</h3>
 								<div className="flex items-center space-x-4 mb-6">
-										<Image
-											alt="InMedina Logo"
-											src={nmlogo}
-											width={70}
-											height={70}
-										/>
+									<Image
+										alt="InMedina Logo"
+										src={nmlogo}
+										width={70}
+										height={70}
+									/>
 									<div>
 										<div className="text-sm text-gray-500">
 											{inmedina.title}
