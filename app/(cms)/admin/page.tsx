@@ -5,14 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 const nav = [
-  { label: "Dashboard", href: "/admin" },
+//   { label: "Dashboard", href: "/admin" },
   { label: "Properties", href: "/admin/properties" },
-  { label: "Posts", href: "/admin/posts" },
-  { label: "Locations", href: "/admin/locations" },
-  { label: "Media", href: "/admin/media" },
-  { label: "Enquiries", href: "/admin/enquiries" },
-  { label: "SEO / Pages", href: "/admin/seo" },
-  { label: "Settings", href: "/admin/settings" },
+//   { label: "Posts", href: "/admin/posts" },
+//   { label: "Locations", href: "/admin/locations" },
+//   { label: "Media", href: "/admin/media" },
+//   { label: "Enquiries", href: "/admin/enquiries" },
+//   { label: "SEO / Pages", href: "/admin/seo" },
+//   { label: "Settings", href: "/admin/settings" },
 ];
 
 export default async function AdminDashboard() {
